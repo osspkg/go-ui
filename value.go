@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 type ValueKind string
@@ -190,25 +191,11 @@ func safePath(path string) bool {
 		return false
 	}
 
-	for _, part := range splitPath(path) {
+	for _, part := range strings.Split(path, ".") {
 		if part == "__proto__" || part == "prototype" || part == "constructor" || part == "" {
 			return false
 		}
 	}
 
 	return true
-}
-
-func splitPath(path string) []string {
-	parts := make([]string, 0, 4)
-	start := 0
-
-	for i := 0; i <= len(path); i++ {
-		if i == len(path) || path[i] == '.' {
-			parts = append(parts, path[start:i])
-			start = i + 1
-		}
-	}
-
-	return parts
 }

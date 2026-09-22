@@ -187,6 +187,7 @@ func LeftPanel(nodes ...*NodeBuilder) ViewOption {
 		schema.Regions.LeftPanel = buildNodes(nodes)
 	}
 }
+
 func Content(nodes ...*NodeBuilder) ViewOption {
 	return func(schema *ViewSchema) {
 		schema.Regions.Content = buildNodes(nodes)

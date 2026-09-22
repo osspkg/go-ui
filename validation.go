@@ -8,6 +8,7 @@ package ui
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -193,18 +194,18 @@ func validateSerializedLimits(schema ViewSchema, limits Limits) error {
 
 func walkLimitValue(value any, depth int, limits Limits, count *int) error {
 	if depth > limits.MaxDepth {
-		return fmt.Errorf("schema depth limit exceeded")
+		return errors.New("schema depth limit exceeded")
 	}
 
 	switch typed := value.(type) {
 	case string:
 		if len(typed) > limits.MaxStringLength {
-			return fmt.Errorf("string length limit exceeded")
+			return errors.New("string length limit exceeded")
 		}
 
 		*count++
 		if *count > limits.MaxStrings {
-			return fmt.Errorf("string count limit exceeded")
+			return errors.New("string count limit exceeded")
 		}
 
 	case []any:
@@ -239,7 +240,7 @@ func validateNode(
 	seen map[string]struct{},
 	limits Limits,
 	view ViewSchema,
-) error {
+) error { //nolint:revive
 	*nodes++
 	if *nodes > limits.MaxNodes || depth > limits.MaxDepth {
 		return fmt.Errorf("%w: node limit exceeded", ErrInvalidSchema)
@@ -339,7 +340,7 @@ func (l Layout) Validate(region string) error {
 func validateValues(values map[string]Value, limits Limits, view ViewSchema) error {
 	for key, value := range values {
 		if len(key) > limits.MaxStringLength {
-			return fmt.Errorf("property name is too long")
+			return errors.New("property name is too long")
 		}
 
 		if err := validateValue(value, limits, view, 0); err != nil {
@@ -352,12 +353,12 @@ func validateValues(values map[string]Value, limits Limits, view ViewSchema) err
 
 func validateAction(action Action, limits Limits, view ViewSchema) error {
 	if action.Type == "tool" && !validName(action.Tool) {
-		return fmt.Errorf("tool action requires a tool")
+		return errors.New("tool action requires a tool")
 	}
 
 	if action.Type == "set-state" || action.Type == "merge-state" {
 		if !safePath(action.Path) {
-			return fmt.Errorf("state action requires a safe path")
+			return errors.New("state action requires a safe path")
 		}
 	}
 
@@ -368,7 +369,7 @@ func validateAction(action Action, limits Limits, view ViewSchema) error {
 	}
 
 	if action.Path != "" && !safePath(action.Path) {
-		return fmt.Errorf("unsafe action path")
+		return errors.New("unsafe action path")
 	}
 
 	if err := validateValues(action.Input, limits, view); err != nil {
@@ -392,7 +393,7 @@ func validateAction(action Action, limits Limits, view ViewSchema) error {
 
 func validateEffect(effect Effect, limits Limits, view ViewSchema) error {
 	if effect.Type == "" {
-		return fmt.Errorf("effect type is required")
+		return errors.New("effect type is required")
 	}
 
 	if !validEffectType(effect.Type) {
@@ -400,12 +401,12 @@ func validateEffect(effect Effect, limits Limits, view ViewSchema) error {
 	}
 
 	if effect.Path != "" && !safePath(effect.Path) {
-		return fmt.Errorf("unsafe effect path")
+		return errors.New("unsafe effect path")
 	}
 
 	if effect.Type == "set-state" || effect.Type == "merge-state" {
 		if !safePath(effect.Path) {
-			return fmt.Errorf("state effect requires a safe path")
+			return errors.New("state effect requires a safe path")
 		}
 	}
 
@@ -416,11 +417,11 @@ func validateEffect(effect Effect, limits Limits, view ViewSchema) error {
 	}
 
 	if effect.Type == "toast" && effect.Message == "" {
-		return fmt.Errorf("toast effect requires a message")
+		return errors.New("toast effect requires a message")
 	}
 
 	if effect.Type == "navigate" && effect.To == "" {
-		return fmt.Errorf("navigate effect requires a target")
+		return errors.New("navigate effect requires a target")
 	}
 
 	if effect.Value != nil {
@@ -434,7 +435,7 @@ func validateEffect(effect Effect, limits Limits, view ViewSchema) error {
 
 func validateValue(value Value, limits Limits, view ViewSchema, depth int) error {
 	if depth > limits.MaxExpressionDepth {
-		return fmt.Errorf("expression depth limit exceeded")
+		return errors.New("expression depth limit exceeded")
 	}
 
 	switch value.Kind {
@@ -462,7 +463,7 @@ func validateValue(value Value, limits Limits, view ViewSchema, depth int) error
 	case ValueExpr:
 		args, ok := value.Data.([]Value)
 		if !ok {
-			return fmt.Errorf("expression arguments have invalid type")
+			return errors.New("expression arguments have invalid type")
 		}
 
 		arity, ok := expressionArity[value.Path]
