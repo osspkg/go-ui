@@ -19,6 +19,7 @@ output:
     text:
       print-linter-name: true
       print-issued-lines: true
+      colors: true
 
 formatters:
   settings:
