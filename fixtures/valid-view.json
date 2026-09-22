@@ -1,0 +1,32 @@
+{
+  "protocolVersion": "1.0",
+  "id": "users.list",
+  "revision": "rev-1",
+  "title": "Users",
+  "state": {"filters": {"search": ""}},
+  "sources": {
+    "users": {
+      "type": "tool",
+      "tool": "users.list",
+      "input": {"search": {"$state": "filters.search"}},
+      "policy": "on-mount"
+    }
+  },
+  "actions": {
+    "users.refresh": {"type": "refresh-source", "source": "users"}
+  },
+  "regions": {
+    "top-header": [],
+    "left-panel": [],
+    "content": [
+      {
+        "id": "users-table",
+        "component": "table",
+        "layout": {"row": 1, "cols": 12},
+        "props": {"rows": {"$source": "users.items"}}
+      }
+    ],
+    "right-panel": [],
+    "bottom": []
+  }
+}

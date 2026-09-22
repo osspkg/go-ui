@@ -1,0 +1,6 @@
+github.com/josharian/intern v1.0.0 h1:vlS4z54oSdjm0bgjRigI+G1HpF+tI+9rE5LLzOg8HmY=
+github.com/josharian/intern v1.0.0/go.mod h1:5DoeVV0s6jJacbCEi61lwdGj/aVlrQvzHFFd8Hwg//Y=
+github.com/mailru/easyjson v0.9.2 h1:dX8U45hQsZpxd80nLvDGihsQ/OxlvTkVUXH2r/8cb2M=
+github.com/mailru/easyjson v0.9.2/go.mod h1:1+xMtQp2MRNVL/V1bOzuP3aP8VNwRW55fQUto+XFtTU=
+go.osspkg.com/mcp v0.1.2 h1:QOo55G9VaNH0KLcSF33eCx7/2r0gIJJySNwzkzOldOo=
+go.osspkg.com/mcp v0.1.2/go.mod h1:/gWcxJAjnVPgcHrcw+lYjpD9uC4xe/YDRTVXAoFfbdo=
