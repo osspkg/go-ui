@@ -6,6 +6,8 @@
 // Package ui defines the transport-independent declarative UI protocol.
 package ui
 
+//go:generate easyjson
+
 import (
 	"errors"
 	"fmt"
@@ -23,6 +25,7 @@ var (
 	ErrInvalidValue  = errors.New("invalid ui value")
 )
 
+//easyjson:json
 type Manifest struct {
 	ProtocolVersion    string             `json:"protocolVersion"`
 	Plugin             PluginManifest     `json:"plugin"`
@@ -30,6 +33,7 @@ type Manifest struct {
 	RequiredComponents []string           `json:"requiredComponents,omitempty"`
 }
 
+//easyjson:json
 type PluginManifest struct {
 	ID          string `json:"id"`
 	Title       string `json:"title"`
@@ -37,6 +41,7 @@ type PluginManifest struct {
 	Description string `json:"description,omitempty"`
 }
 
+//easyjson:json
 type UIViewDescriptor struct {
 	ID     string `json:"id"`
 	Title  string `json:"title"`
@@ -44,6 +49,7 @@ type UIViewDescriptor struct {
 	Schema string `json:"schema"`
 }
 
+//easyjson:json
 type ViewSchema struct {
 	ProtocolVersion string                `json:"protocolVersion"`
 	ID              string                `json:"id"`
@@ -55,6 +61,7 @@ type ViewSchema struct {
 	Regions         Regions               `json:"regions"`
 }
 
+//easyjson:json
 type Regions struct {
 	TopHeader  []Node `json:"top-header"`
 	LeftPanel  []Node `json:"left-panel"`
@@ -63,12 +70,14 @@ type Regions struct {
 	Bottom     []Node `json:"bottom"`
 }
 
+//easyjson:json
 type Layout struct {
 	Row    int `json:"row"`
 	Cols   int `json:"cols,omitempty"`
 	Offset int `json:"offset,omitempty"`
 }
 
+//easyjson:json
 type Node struct {
 	ID        string                  `json:"id"`
 	Component string                  `json:"component"`
@@ -80,11 +89,13 @@ type Node struct {
 	When      *Value                  `json:"when,omitempty"`
 }
 
+//easyjson:json
 type EventHandler struct {
 	Action string       `json:"action,omitempty"`
 	Steps  []ActionStep `json:"steps,omitempty"`
 }
 
+//easyjson:json
 type DataSource struct {
 	Type      string           `json:"type"`
 	Tool      string           `json:"tool"`
@@ -101,10 +112,12 @@ const (
 	SourceOnMount SourcePolicy = "on-mount"
 )
 
+//easyjson:json
 type CachePolicy struct {
 	TTL int64 `json:"ttl,omitempty"`
 }
 
+//easyjson:json
 type Action struct {
 	Type    string           `json:"type"`
 	Tool    string           `json:"tool,omitempty"`
@@ -118,12 +131,14 @@ type Action struct {
 	Effects []Effect         `json:"effects,omitempty"`
 }
 
+//easyjson:json
 type ActionStep struct {
 	Type   string           `json:"type"`
 	Action string           `json:"action,omitempty"`
 	Input  map[string]Value `json:"input,omitempty"`
 }
 
+//easyjson:json
 type Effect struct {
 	Type         string `json:"type"`
 	Path         string `json:"path,omitempty"`
@@ -140,19 +155,24 @@ func (m Manifest) Validate() error {
 	if m.ProtocolVersion != ProtocolVersion {
 		return fmt.Errorf("%w: unsupported manifest protocol version %q", ErrInvalidSchema, m.ProtocolVersion)
 	}
+
 	if m.Plugin.ID == "" {
 		return fmt.Errorf("%w: plugin id is required", ErrInvalidSchema)
 	}
+
 	seen := make(map[string]struct{}, len(m.Views))
 	for _, view := range m.Views {
 		if view.ID == "" || view.Schema == "" {
 			return fmt.Errorf("%w: view id and schema are required", ErrInvalidSchema)
 		}
+
 		if _, ok := seen[view.ID]; ok {
 			return fmt.Errorf("%w: duplicate view %q", ErrInvalidSchema, view.ID)
 		}
+
 		seen[view.ID] = struct{}{}
 	}
+
 	return nil
 }
 

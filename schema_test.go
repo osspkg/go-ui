@@ -23,6 +23,37 @@ func TestUnit_ValueRoundTrip(t *testing.T) {
 	}
 }
 
+func TestUnit_ValueLiteralObjects(t *testing.T) {
+	for _, data := range []string{
+		`{"rows":[{"id":1}]}`,
+		`{"disabled":null}`,
+	} {
+		t.Run(data, func(t *testing.T) {
+			var value Value
+			if err := json.Unmarshal([]byte(data), &value); err != nil {
+				t.Fatal(err)
+			}
+			if value.Kind != ValueLiteral {
+				t.Fatalf("value kind = %q, want %q", value.Kind, ValueLiteral)
+			}
+			encoded, err := json.Marshal(value)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var want, got any
+			if err := json.Unmarshal([]byte(data), &want); err != nil {
+				t.Fatal(err)
+			}
+			if err := json.Unmarshal(encoded, &got); err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(got, want) {
+				t.Fatalf("round-trip JSON differs: got %s, want %s", encoded, data)
+			}
+		})
+	}
+}
+
 func TestUnit_LayoutValidation(t *testing.T) {
 	tests := []struct {
 		name   string
@@ -102,6 +133,26 @@ func TestUnit_SemanticValidation(t *testing.T) {
 				t.Fatalf("validation error = %v, want %v", err, test.want)
 			}
 		})
+	}
+}
+
+func TestUnit_DottedSourceReference(t *testing.T) {
+	regions := emptyRegions()
+	regions.Content = []Node{{
+		ID:        "orders-table",
+		Component: "table",
+		Props:     map[string]Value{"rows": SourceRef("orders.list.items")},
+	}}
+	view := ViewSchema{
+		ProtocolVersion: ProtocolVersion,
+		ID:              "orders",
+		Sources: map[string]DataSource{
+			"orders.list": {Type: "tool", Tool: "orders.list"},
+		},
+		Regions: regions,
+	}
+	if err := view.Validate(); err != nil {
+		t.Fatalf("Validate() error = %v", err)
 	}
 }
 

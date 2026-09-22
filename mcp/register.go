@@ -9,6 +9,7 @@ package mcp
 import (
 	"encoding/json"
 	"errors"
+	"strings"
 
 	ossmcp "go.osspkg.com/mcp"
 
@@ -32,14 +33,17 @@ func Register(server *ossmcp.Server, app *ui.App) error {
 	if server == nil || app == nil {
 		return errors.New("ui/mcp: server and app are required")
 	}
+
 	manifest, err := app.ManifestJSON()
 	if err != nil {
 		return err
 	}
-	if err := app.Manifest().Validate(); err != nil {
+
+	if err = app.Manifest().Validate(); err != nil {
 		return err
 	}
-	if err := server.RegisterResource(
+
+	if err = server.RegisterResource(
 		ossmcp.Resource{
 			URI:         "ui://manifest",
 			Name:        "UI Manifest",
@@ -50,19 +54,27 @@ func Register(server *ossmcp.Server, app *ui.App) error {
 	); err != nil {
 		return err
 	}
+
 	for _, descriptor := range app.Manifest().Views {
 		view, ok := app.View(descriptor.ID)
 		if !ok {
 			return errors.New("ui/mcp: manifest view is missing")
 		}
+
 		payload, err := json.Marshal(view)
 		if err != nil {
 			return err
 		}
+
+		name := descriptor.Title
+		if strings.TrimSpace(name) == "" {
+			name = descriptor.ID
+		}
+
 		if err := server.RegisterResource(
 			ossmcp.Resource{
 				URI:      descriptor.Schema,
-				Name:     descriptor.Title,
+				Name:     name,
 				MIMEType: ui.UIMIMEType,
 				Text:     string(payload),
 			},
@@ -70,5 +82,6 @@ func Register(server *ossmcp.Server, app *ui.App) error {
 			return err
 		}
 	}
+
 	return nil
 }

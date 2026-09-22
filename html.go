@@ -111,4 +111,6 @@ const (
 
 // HTML creates a node for a safe HTML body element. The host must register the
 // matching React component and explicitly allow its props and events.
-func HTML(tag HTMLTag, id string) *NodeBuilder { return node(string(tag), id) }
+func HTML(tag HTMLTag, id string) *NodeBuilder {
+	return node(string(tag), id)
+}
