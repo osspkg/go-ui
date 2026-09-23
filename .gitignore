@@ -18,4 +18,3 @@ coverage.out
 *.test
 *.out
 .env
-Makefile
