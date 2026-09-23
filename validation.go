@@ -13,6 +13,26 @@ import (
 	"strings"
 )
 
+const (
+	defaultMaxBytes           = 1 << 20
+	defaultMaxNodes           = 1000
+	defaultMaxDepth           = 32
+	defaultMaxPropsPerNode    = 64
+	defaultMaxActions         = 128
+	defaultMaxSources         = 64
+	defaultMaxStrings         = 10000
+	defaultMaxStringLength    = 16 << 10
+	defaultMaxExpressionDepth = 32
+
+	actionTypeTool          = "tool"
+	actionTypeSetState      = "set-state"
+	actionTypeMergeState    = "merge-state"
+	actionTypeRefreshSource = "refresh-source"
+	actionTypeInvalidate    = "invalidate"
+	actionStepTypeAction    = "action"
+)
+
+// Limits bounds the size and complexity of a view schema.
 type Limits struct {
 	MaxBytes           int
 	MaxNodes           int
@@ -25,24 +45,27 @@ type Limits struct {
 	MaxExpressionDepth int
 }
 
+// DefaultLimits returns the default schema validation limits.
 func DefaultLimits() Limits {
 	return Limits{
-		MaxBytes:           1 << 20,
-		MaxNodes:           1000,
-		MaxDepth:           32,
-		MaxPropsPerNode:    64,
-		MaxActions:         128,
-		MaxSources:         64,
-		MaxStrings:         10000,
-		MaxStringLength:    16 << 10,
-		MaxExpressionDepth: 32,
+		MaxBytes:           defaultMaxBytes,
+		MaxNodes:           defaultMaxNodes,
+		MaxDepth:           defaultMaxDepth,
+		MaxPropsPerNode:    defaultMaxPropsPerNode,
+		MaxActions:         defaultMaxActions,
+		MaxSources:         defaultMaxSources,
+		MaxStrings:         defaultMaxStrings,
+		MaxStringLength:    defaultMaxStringLength,
+		MaxExpressionDepth: defaultMaxExpressionDepth,
 	}
 }
 
+// Validate checks the schema against the default validation limits.
 func (v ViewSchema) Validate() error {
 	return v.ValidateWithLimits(DefaultLimits())
 }
 
+// ValidateWithLimits checks the schema against caller-provided limits.
 func (v ViewSchema) ValidateWithLimits(limits Limits) error {
 	limits = withDefaultLimits(limits)
 
@@ -71,7 +94,7 @@ func (v ViewSchema) ValidateWithLimits(limits Limits) error {
 	}
 
 	for name, source := range v.Sources {
-		if !validName(name) || source.Type != "tool" || !validName(source.Tool) {
+		if !validName(name) || source.Type != actionTypeTool || !validName(source.Tool) {
 			return fmt.Errorf("%w: invalid source %q", ErrInvalidSchema, name)
 		}
 
@@ -104,8 +127,11 @@ func (v ViewSchema) ValidateWithLimits(limits Limits) error {
 		}
 	}
 
-	seen := make(map[string]struct{})
-	nodes := 0
+	context := validationContext{
+		limits: limits,
+		view:   v,
+		seen:   make(map[string]struct{}),
+	}
 
 	for region, list := range map[string][]Node{
 		"top-header":  v.Regions.TopHeader,
@@ -115,7 +141,7 @@ func (v ViewSchema) ValidateWithLimits(limits Limits) error {
 		"bottom":      v.Regions.Bottom,
 	} {
 		for _, n := range list {
-			if err := validateNode(n, region, 1, &nodes, seen, limits, v); err != nil {
+			if err := context.validateNode(n, region, 1); err != nil {
 				return err
 			}
 		}
@@ -232,17 +258,16 @@ func walkLimitValue(value any, depth int, limits Limits, count *int) error {
 	return nil
 }
 
-func validateNode(
-	node Node,
-	region string,
-	depth int,
-	nodes *int,
-	seen map[string]struct{},
-	limits Limits,
-	view ViewSchema,
-) error { //nolint:revive
-	*nodes++
-	if *nodes > limits.MaxNodes || depth > limits.MaxDepth {
+type validationContext struct {
+	limits Limits
+	view   ViewSchema
+	seen   map[string]struct{}
+	nodes  int
+}
+
+func (context *validationContext) validateNode(node Node, region string, depth int) error {
+	context.nodes++
+	if context.nodes > context.limits.MaxNodes || depth > context.limits.MaxDepth {
 		return fmt.Errorf("%w: node limit exceeded", ErrInvalidSchema)
 	}
 
@@ -250,22 +275,22 @@ func validateNode(
 		return fmt.Errorf("%w: node id and component are required", ErrInvalidSchema)
 	}
 
-	if _, exists := seen[node.ID]; exists {
+	if _, exists := context.seen[node.ID]; exists {
 		return fmt.Errorf("%w: duplicate node id %q", ErrInvalidSchema, node.ID)
 	}
 
-	seen[node.ID] = struct{}{}
+	context.seen[node.ID] = struct{}{}
 	if node.Layout != nil {
 		if err := node.Layout.Validate(region); err != nil {
 			return err
 		}
 	}
 
-	if len(node.Props) > limits.MaxPropsPerNode {
+	if len(node.Props) > context.limits.MaxPropsPerNode {
 		return fmt.Errorf("%w: too many props on node %q", ErrInvalidSchema, node.ID)
 	}
 
-	if err := validateValues(node.Props, limits, view); err != nil {
+	if err := validateValues(node.Props, context.limits, context.view); err != nil {
 		return fmt.Errorf("%w: node %q props: %w", ErrInvalidSchema, node.ID, err)
 	}
 
@@ -275,41 +300,41 @@ func validateNode(
 		}
 
 		if handler.Action != "" {
-			if _, ok := view.Actions[handler.Action]; !ok {
+			if _, ok := context.view.Actions[handler.Action]; !ok {
 				return fmt.Errorf("%w: action %q is not defined", ErrInvalidSchema, handler.Action)
 			}
 		}
 
 		for _, step := range handler.Steps {
-			if step.Type != "action" || step.Action == "" {
+			if step.Type != actionStepTypeAction || step.Action == "" {
 				return fmt.Errorf("%w: invalid event step on node %q", ErrInvalidSchema, node.ID)
 			}
 
-			if _, ok := view.Actions[step.Action]; !ok {
+			if _, ok := context.view.Actions[step.Action]; !ok {
 				return fmt.Errorf("%w: action %q is not defined", ErrInvalidSchema, step.Action)
 			}
 
-			if err := validateValues(step.Input, limits, view); err != nil {
+			if err := validateValues(step.Input, context.limits, context.view); err != nil {
 				return fmt.Errorf("%w: event step input: %w", ErrInvalidSchema, err)
 			}
 		}
 	}
 
 	if node.When != nil {
-		if err := validateValue(*node.When, limits, view, 0); err != nil {
+		if err := validateValue(*node.When, context.limits, context.view, 0); err != nil {
 			return fmt.Errorf("%w: node %q condition: %w", ErrInvalidSchema, node.ID, err)
 		}
 	}
 
 	for _, child := range node.Children {
-		if err := validateNode(child, region, depth+1, nodes, seen, limits, view); err != nil {
+		if err := context.validateNode(child, region, depth+1); err != nil {
 			return err
 		}
 	}
 
 	for _, children := range node.Slots {
 		for _, child := range children {
-			if err := validateNode(child, region, depth+1, nodes, seen, limits, view); err != nil {
+			if err := context.validateNode(child, region, depth+1); err != nil {
 				return err
 			}
 		}
@@ -318,6 +343,7 @@ func validateNode(
 	return nil
 }
 
+// Validate checks whether the layout fits the specified region.
 func (l Layout) Validate(region string) error {
 	if l.Row < 1 {
 		return fmt.Errorf("%w: row must be positive", ErrInvalidLayout)
@@ -352,17 +378,17 @@ func validateValues(values map[string]Value, limits Limits, view ViewSchema) err
 }
 
 func validateAction(action Action, limits Limits, view ViewSchema) error {
-	if action.Type == "tool" && !validName(action.Tool) {
+	if action.Type == actionTypeTool && !validName(action.Tool) {
 		return errors.New("tool action requires a tool")
 	}
 
-	if action.Type == "set-state" || action.Type == "merge-state" {
+	if action.Type == actionTypeSetState || action.Type == actionTypeMergeState {
 		if !safePath(action.Path) {
 			return errors.New("state action requires a safe path")
 		}
 	}
 
-	if action.Type == "refresh-source" || action.Type == "invalidate" {
+	if action.Type == actionTypeRefreshSource || action.Type == actionTypeInvalidate {
 		if _, ok := view.Sources[action.Source]; !ok {
 			return fmt.Errorf("source %q is not defined", action.Source)
 		}
@@ -404,13 +430,13 @@ func validateEffect(effect Effect, limits Limits, view ViewSchema) error {
 		return errors.New("unsafe effect path")
 	}
 
-	if effect.Type == "set-state" || effect.Type == "merge-state" {
+	if effect.Type == actionTypeSetState || effect.Type == actionTypeMergeState {
 		if !safePath(effect.Path) {
 			return errors.New("state effect requires a safe path")
 		}
 	}
 
-	if effect.Type == "invalidate" || effect.Type == "refresh-source" {
+	if effect.Type == actionTypeInvalidate || effect.Type == actionTypeRefreshSource {
 		if _, ok := view.Sources[effect.Source]; !ok {
 			return fmt.Errorf("source %q is not defined", effect.Source)
 		}
@@ -513,7 +539,7 @@ func sourceForPath(path string, sources map[string]DataSource) (string, bool) {
 
 func validActionType(value string) bool {
 	switch value {
-	case "tool", "set-state", "merge-state", "refresh-source", "invalidate":
+	case actionTypeTool, actionTypeSetState, actionTypeMergeState, actionTypeRefreshSource, actionTypeInvalidate:
 		return true
 	default:
 		return false
@@ -522,7 +548,7 @@ func validActionType(value string) bool {
 
 func validEffectType(value string) bool {
 	switch value {
-	case "set-state", "merge-state", "invalidate", "refresh-source",
+	case actionTypeSetState, actionTypeMergeState, actionTypeInvalidate, actionTypeRefreshSource,
 		"refresh-view", "patch-view", "navigate", "toast",
 		"dialog", "close-dialog":
 		return true

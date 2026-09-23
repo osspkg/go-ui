@@ -9,10 +9,15 @@ package ui
 // catalog. Register a matching React implementation before rendering it.
 type ShadcnComponent string
 
+// Shadcn constants identify host-owned shadcn/ui components.
 const (
-	ShadcnAccordion       ShadcnComponent = "accordion"
-	ShadcnAlert           ShadcnComponent = "alert"
-	ShadcnAlertDialog     ShadcnComponent = "alert-dialog"
+	// ShadcnAccordion through ShadcnTypography enumerate supported shadcn/ui components.
+	ShadcnAccordion ShadcnComponent = "accordion"
+	// ShadcnAlert identifies the alert component.
+	ShadcnAlert ShadcnComponent = "alert"
+	// ShadcnAlertDialog identifies the alert dialog component.
+	ShadcnAlertDialog ShadcnComponent = "alert-dialog"
+	// ShadcnAspectRatio identifies the aspect ratio component.
 	ShadcnAspectRatio     ShadcnComponent = "aspect-ratio"
 	ShadcnAttachment      ShadcnComponent = "attachment"
 	ShadcnAvatar          ShadcnComponent = "avatar"
@@ -79,64 +84,185 @@ const (
 // Shadcn creates a node for a component from the shadcn/ui catalog.
 func Shadcn(component ShadcnComponent, id string) *NodeBuilder { return node(string(component), id) }
 
-func Accordion(id string) *NodeBuilder       { return Shadcn(ShadcnAccordion, id) }
-func Alert(id string) *NodeBuilder           { return Shadcn(ShadcnAlert, id) }
-func AlertDialog(id string) *NodeBuilder     { return Shadcn(ShadcnAlertDialog, id) }
-func AspectRatio(id string) *NodeBuilder     { return Shadcn(ShadcnAspectRatio, id) }
-func Attachment(id string) *NodeBuilder      { return Shadcn(ShadcnAttachment, id) }
-func Avatar(id string) *NodeBuilder          { return Shadcn(ShadcnAvatar, id) }
-func Badge(id string) *NodeBuilder           { return Shadcn(ShadcnBadge, id) }
-func Breadcrumb(id string) *NodeBuilder      { return Shadcn(ShadcnBreadcrumb, id) }
-func Bubble(id string) *NodeBuilder          { return Shadcn(ShadcnBubble, id) }
-func ButtonGroup(id string) *NodeBuilder     { return Shadcn(ShadcnButtonGroup, id) }
-func Calendar(id string) *NodeBuilder        { return Shadcn(ShadcnCalendar, id) }
-func Carousel(id string) *NodeBuilder        { return Shadcn(ShadcnCarousel, id) }
-func Chart(id string) *NodeBuilder           { return Shadcn(ShadcnChart, id) }
-func Checkbox(id string) *NodeBuilder        { return Shadcn(ShadcnCheckbox, id) }
-func Collapsible(id string) *NodeBuilder     { return Shadcn(ShadcnCollapsible, id) }
-func Combobox(id string) *NodeBuilder        { return Shadcn(ShadcnCombobox, id) }
-func Command(id string) *NodeBuilder         { return Shadcn(ShadcnCommand, id) }
-func ContextMenu(id string) *NodeBuilder     { return Shadcn(ShadcnContextMenu, id) }
-func DataTable(id string) *NodeBuilder       { return Shadcn(ShadcnDataTable, id) }
-func DatePicker(id string) *NodeBuilder      { return Shadcn(ShadcnDatePicker, id) }
-func Dialog(id string) *NodeBuilder          { return Shadcn(ShadcnDialog, id) }
-func Direction(id string) *NodeBuilder       { return Shadcn(ShadcnDirection, id) }
-func Drawer(id string) *NodeBuilder          { return Shadcn(ShadcnDrawer, id) }
-func DropdownMenu(id string) *NodeBuilder    { return Shadcn(ShadcnDropdownMenu, id) }
-func Empty(id string) *NodeBuilder           { return Shadcn(ShadcnEmpty, id) }
-func Field(id string) *NodeBuilder           { return Shadcn(ShadcnField, id) }
-func HoverCard(id string) *NodeBuilder       { return Shadcn(ShadcnHoverCard, id) }
-func Input(id string) *NodeBuilder           { return Shadcn(ShadcnInput, id) }
-func InputGroup(id string) *NodeBuilder      { return Shadcn(ShadcnInputGroup, id) }
-func InputOTP(id string) *NodeBuilder        { return Shadcn(ShadcnInputOTP, id) }
-func Item(id string) *NodeBuilder            { return Shadcn(ShadcnItem, id) }
-func Kbd(id string) *NodeBuilder             { return Shadcn(ShadcnKbd, id) }
-func Label(id string) *NodeBuilder           { return Shadcn(ShadcnLabel, id) }
-func Marker(id string) *NodeBuilder          { return Shadcn(ShadcnMarker, id) }
-func Menubar(id string) *NodeBuilder         { return Shadcn(ShadcnMenubar, id) }
-func Message(id string) *NodeBuilder         { return Shadcn(ShadcnMessage, id) }
+// Accordion creates an accordion node.
+func Accordion(id string) *NodeBuilder { return Shadcn(ShadcnAccordion, id) }
+
+// Alert creates an alert node.
+func Alert(id string) *NodeBuilder { return Shadcn(ShadcnAlert, id) }
+
+// AlertDialog creates an alert dialog node.
+func AlertDialog(id string) *NodeBuilder { return Shadcn(ShadcnAlertDialog, id) }
+
+// AspectRatio creates an aspect ratio node.
+func AspectRatio(id string) *NodeBuilder { return Shadcn(ShadcnAspectRatio, id) }
+
+// Attachment creates an attachment node.
+func Attachment(id string) *NodeBuilder { return Shadcn(ShadcnAttachment, id) }
+
+// Avatar creates an avatar node.
+func Avatar(id string) *NodeBuilder { return Shadcn(ShadcnAvatar, id) }
+
+// Badge creates a badge node.
+func Badge(id string) *NodeBuilder { return Shadcn(ShadcnBadge, id) }
+
+// Breadcrumb creates a breadcrumb node.
+func Breadcrumb(id string) *NodeBuilder { return Shadcn(ShadcnBreadcrumb, id) }
+
+// Bubble creates a bubble node.
+func Bubble(id string) *NodeBuilder { return Shadcn(ShadcnBubble, id) }
+
+// ButtonGroup creates a button group node.
+func ButtonGroup(id string) *NodeBuilder { return Shadcn(ShadcnButtonGroup, id) }
+
+// Calendar creates a calendar node.
+func Calendar(id string) *NodeBuilder { return Shadcn(ShadcnCalendar, id) }
+
+// Carousel creates a carousel node.
+func Carousel(id string) *NodeBuilder { return Shadcn(ShadcnCarousel, id) }
+
+// Chart creates a chart node.
+func Chart(id string) *NodeBuilder { return Shadcn(ShadcnChart, id) }
+
+// Checkbox creates a checkbox node.
+func Checkbox(id string) *NodeBuilder { return Shadcn(ShadcnCheckbox, id) }
+
+// Collapsible creates a collapsible node.
+func Collapsible(id string) *NodeBuilder { return Shadcn(ShadcnCollapsible, id) }
+
+// Combobox creates a combobox node.
+func Combobox(id string) *NodeBuilder { return Shadcn(ShadcnCombobox, id) }
+
+// Command creates a command node.
+func Command(id string) *NodeBuilder { return Shadcn(ShadcnCommand, id) }
+
+// ContextMenu creates a context menu node.
+func ContextMenu(id string) *NodeBuilder { return Shadcn(ShadcnContextMenu, id) }
+
+// DataTable creates a data table node.
+func DataTable(id string) *NodeBuilder { return Shadcn(ShadcnDataTable, id) }
+
+// DatePicker creates a date picker node.
+func DatePicker(id string) *NodeBuilder { return Shadcn(ShadcnDatePicker, id) }
+
+// Dialog creates a dialog node.
+func Dialog(id string) *NodeBuilder { return Shadcn(ShadcnDialog, id) }
+
+// Direction creates a direction node.
+func Direction(id string) *NodeBuilder { return Shadcn(ShadcnDirection, id) }
+
+// Drawer creates a drawer node.
+func Drawer(id string) *NodeBuilder { return Shadcn(ShadcnDrawer, id) }
+
+// DropdownMenu creates a dropdown menu node.
+func DropdownMenu(id string) *NodeBuilder { return Shadcn(ShadcnDropdownMenu, id) }
+
+// Empty creates an empty-state node.
+func Empty(id string) *NodeBuilder { return Shadcn(ShadcnEmpty, id) }
+
+// Field creates a field node.
+func Field(id string) *NodeBuilder { return Shadcn(ShadcnField, id) }
+
+// HoverCard creates a hover card node.
+func HoverCard(id string) *NodeBuilder { return Shadcn(ShadcnHoverCard, id) }
+
+// Input creates an input node.
+func Input(id string) *NodeBuilder { return Shadcn(ShadcnInput, id) }
+
+// InputGroup creates an input group node.
+func InputGroup(id string) *NodeBuilder { return Shadcn(ShadcnInputGroup, id) }
+
+// InputOTP creates an input OTP node.
+func InputOTP(id string) *NodeBuilder { return Shadcn(ShadcnInputOTP, id) }
+
+// Item creates an item node.
+func Item(id string) *NodeBuilder { return Shadcn(ShadcnItem, id) }
+
+// Kbd creates a keyboard shortcut node.
+func Kbd(id string) *NodeBuilder { return Shadcn(ShadcnKbd, id) }
+
+// Label creates a label node.
+func Label(id string) *NodeBuilder { return Shadcn(ShadcnLabel, id) }
+
+// Marker creates a marker node.
+func Marker(id string) *NodeBuilder { return Shadcn(ShadcnMarker, id) }
+
+// Menubar creates a menubar node.
+func Menubar(id string) *NodeBuilder { return Shadcn(ShadcnMenubar, id) }
+
+// Message creates a message node.
+func Message(id string) *NodeBuilder { return Shadcn(ShadcnMessage, id) }
+
+// MessageScroller creates a message scroller node.
 func MessageScroller(id string) *NodeBuilder { return Shadcn(ShadcnMessageScroller, id) }
-func NativeSelect(id string) *NodeBuilder    { return Shadcn(ShadcnNativeSelect, id) }
-func NavigationMenu(id string) *NodeBuilder  { return Shadcn(ShadcnNavigationMenu, id) }
-func Pagination(id string) *NodeBuilder      { return Shadcn(ShadcnPagination, id) }
-func Popover(id string) *NodeBuilder         { return Shadcn(ShadcnPopover, id) }
-func Progress(id string) *NodeBuilder        { return Shadcn(ShadcnProgress, id) }
-func Questionnaire(id string) *NodeBuilder   { return Shadcn(ShadcnQuestionnaire, id) }
-func RadioGroup(id string) *NodeBuilder      { return Shadcn(ShadcnRadioGroup, id) }
-func Resizable(id string) *NodeBuilder       { return Shadcn(ShadcnResizable, id) }
-func ScrollArea(id string) *NodeBuilder      { return Shadcn(ShadcnScrollArea, id) }
-func Select(id string) *NodeBuilder          { return Shadcn(ShadcnSelect, id) }
-func Separator(id string) *NodeBuilder       { return Shadcn(ShadcnSeparator, id) }
-func Sheet(id string) *NodeBuilder           { return Shadcn(ShadcnSheet, id) }
-func Sidebar(id string) *NodeBuilder         { return Shadcn(ShadcnSidebar, id) }
-func Skeleton(id string) *NodeBuilder        { return Shadcn(ShadcnSkeleton, id) }
-func Slider(id string) *NodeBuilder          { return Shadcn(ShadcnSlider, id) }
-func Spinner(id string) *NodeBuilder         { return Shadcn(ShadcnSpinner, id) }
-func Switch(id string) *NodeBuilder          { return Shadcn(ShadcnSwitch, id) }
-func Tabs(id string) *NodeBuilder            { return Shadcn(ShadcnTabs, id) }
-func Textarea(id string) *NodeBuilder        { return Shadcn(ShadcnTextarea, id) }
-func Toast(id string) *NodeBuilder           { return Shadcn(ShadcnToast, id) }
-func Toggle(id string) *NodeBuilder          { return Shadcn(ShadcnToggle, id) }
-func ToggleGroup(id string) *NodeBuilder     { return Shadcn(ShadcnToggleGroup, id) }
-func Tooltip(id string) *NodeBuilder         { return Shadcn(ShadcnTooltip, id) }
-func Typography(id string) *NodeBuilder      { return Shadcn(ShadcnTypography, id) }
+
+// NativeSelect creates a native select node.
+func NativeSelect(id string) *NodeBuilder { return Shadcn(ShadcnNativeSelect, id) }
+
+// NavigationMenu creates a navigation menu node.
+func NavigationMenu(id string) *NodeBuilder { return Shadcn(ShadcnNavigationMenu, id) }
+
+// Pagination creates a pagination node.
+func Pagination(id string) *NodeBuilder { return Shadcn(ShadcnPagination, id) }
+
+// Popover creates a popover node.
+func Popover(id string) *NodeBuilder { return Shadcn(ShadcnPopover, id) }
+
+// Progress creates a progress node.
+func Progress(id string) *NodeBuilder { return Shadcn(ShadcnProgress, id) }
+
+// Questionnaire creates a questionnaire node.
+func Questionnaire(id string) *NodeBuilder { return Shadcn(ShadcnQuestionnaire, id) }
+
+// RadioGroup creates a radio group node.
+func RadioGroup(id string) *NodeBuilder { return Shadcn(ShadcnRadioGroup, id) }
+
+// Resizable creates a resizable node.
+func Resizable(id string) *NodeBuilder { return Shadcn(ShadcnResizable, id) }
+
+// ScrollArea creates a scroll area node.
+func ScrollArea(id string) *NodeBuilder { return Shadcn(ShadcnScrollArea, id) }
+
+// Select creates a select node.
+func Select(id string) *NodeBuilder { return Shadcn(ShadcnSelect, id) }
+
+// Separator creates a separator node.
+func Separator(id string) *NodeBuilder { return Shadcn(ShadcnSeparator, id) }
+
+// Sheet creates a sheet node.
+func Sheet(id string) *NodeBuilder { return Shadcn(ShadcnSheet, id) }
+
+// Sidebar creates a sidebar node.
+func Sidebar(id string) *NodeBuilder { return Shadcn(ShadcnSidebar, id) }
+
+// Skeleton creates a skeleton node.
+func Skeleton(id string) *NodeBuilder { return Shadcn(ShadcnSkeleton, id) }
+
+// Slider creates a slider node.
+func Slider(id string) *NodeBuilder { return Shadcn(ShadcnSlider, id) }
+
+// Spinner creates a spinner node.
+func Spinner(id string) *NodeBuilder { return Shadcn(ShadcnSpinner, id) }
+
+// Switch creates a switch node.
+func Switch(id string) *NodeBuilder { return Shadcn(ShadcnSwitch, id) }
+
+// Tabs creates a tabs node.
+func Tabs(id string) *NodeBuilder { return Shadcn(ShadcnTabs, id) }
+
+// Textarea creates a textarea node.
+func Textarea(id string) *NodeBuilder { return Shadcn(ShadcnTextarea, id) }
+
+// Toast creates a toast node.
+func Toast(id string) *NodeBuilder { return Shadcn(ShadcnToast, id) }
+
+// Toggle creates a toggle node.
+func Toggle(id string) *NodeBuilder { return Shadcn(ShadcnToggle, id) }
+
+// ToggleGroup creates a toggle group node.
+func ToggleGroup(id string) *NodeBuilder { return Shadcn(ShadcnToggleGroup, id) }
+
+// Tooltip creates a tooltip node.
+func Tooltip(id string) *NodeBuilder { return Shadcn(ShadcnTooltip, id) }
+
+// Typography creates a typography node.
+func Typography(id string) *NodeBuilder { return Shadcn(ShadcnTypography, id) }

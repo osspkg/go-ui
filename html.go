@@ -9,10 +9,15 @@ package ui
 // and embedded-content elements are intentionally excluded.
 type HTMLTag string
 
+// HTML constants identify safe HTML body elements supported by the protocol.
 const (
-	HTMLA          HTMLTag = "a"
-	HTMLAbbr       HTMLTag = "abbr"
-	HTMLAddress    HTMLTag = "address"
+	// HTMLA through HTMLWbr enumerate supported safe HTML body elements.
+	HTMLA HTMLTag = "a"
+	// HTMLAbbr is the safe HTML abbreviation element.
+	HTMLAbbr HTMLTag = "abbr"
+	// HTMLAddress is the safe HTML contact-information element.
+	HTMLAddress HTMLTag = "address"
+	// HTMLArea is the safe HTML area element.
 	HTMLArea       HTMLTag = "area"
 	HTMLArticle    HTMLTag = "article"
 	HTMLAside      HTMLTag = "aside"

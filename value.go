@@ -12,18 +12,27 @@ import (
 	"strings"
 )
 
+// ValueKind identifies how a Value obtains its data.
 type ValueKind string
 
+// Value kind constants identify the supported value representations.
 const (
+	// ValueLiteral stores data directly in the value.
 	ValueLiteral ValueKind = "literal"
-	ValueState   ValueKind = "state"
+	// ValueState references view state.
+	ValueState ValueKind = "state"
+	// ValueContext references host context.
 	ValueContext ValueKind = "context"
-	ValueSource  ValueKind = "source"
-	ValueEvent   ValueKind = "event"
-	ValueResult  ValueKind = "result"
-	ValueExpr    ValueKind = "expression"
+	// ValueSource references source data.
+	ValueSource ValueKind = "source"
+	ValueEvent  ValueKind = "event"
+	ValueResult ValueKind = "result"
+	ValueExpr   ValueKind = "expression"
 )
 
+// Value is a literal, reference, or expression used by the declarative UI model.
+//
+//nolint:recvcheck // JSON values intentionally marshal by value and unmarshal by pointer.
 type Value struct {
 	Kind ValueKind
 	Path string
@@ -47,34 +56,42 @@ var expressionArity = map[string][2]int{
 	"$if":       {3, 3},
 }
 
+// Literal creates a value containing data directly.
 func Literal(data any) Value {
 	return Value{Kind: ValueLiteral, Data: data}
 }
 
+// StateRef creates a value referencing view state at path.
 func StateRef(path string) Value {
 	return Value{Kind: ValueState, Path: path}
 }
 
+// ContextRef creates a value referencing host context at path.
 func ContextRef(path string) Value {
 	return Value{Kind: ValueContext, Path: path}
 }
 
+// SourceRef creates a value referencing source data at path.
 func SourceRef(path string) Value {
 	return Value{Kind: ValueSource, Path: path}
 }
 
+// EventRef creates a value referencing the current event at path.
 func EventRef(path string) Value {
 	return Value{Kind: ValueEvent, Path: path}
 }
 
+// ResultRef creates a value referencing the previous action result at path.
 func ResultRef(path string) Value {
 	return Value{Kind: ValueResult, Path: path}
 }
 
+// Expr creates a value representing an expression operator and its arguments.
 func Expr(operator string, args ...Value) Value {
 	return Value{Kind: ValueExpr, Path: operator, Data: append([]Value(nil), args...)}
 }
 
+// Validate checks that the value kind, path, and expression arguments are valid.
 func (v Value) Validate() error {
 	switch v.Kind {
 	case ValueLiteral:
@@ -119,6 +136,7 @@ func (v Value) Validate() error {
 	}
 }
 
+// MarshalJSON encodes the value in the declarative UI wire format.
 func (v Value) MarshalJSON() ([]byte, error) {
 	if err := v.Validate(); err != nil {
 		return nil, err
@@ -140,42 +158,68 @@ func (v Value) MarshalJSON() ([]byte, error) {
 	return json.Marshal(map[string]string{"$" + string(v.Kind): v.Path})
 }
 
+func (v *Value) unmarshalSpecial(data []byte) (bool, error) {
+	var object map[string]json.RawMessage
+	if err := json.Unmarshal(data, &object); err != nil {
+		return false, fmt.Errorf("%w: %s", ErrInvalidValue, err.Error())
+	}
+
+	if len(object) != 1 {
+		return false, fmt.Errorf("%w: expected 1 object, got %d", ErrInvalidValue, len(object))
+	}
+
+	for key, raw := range object {
+		return v.unmarshalSpecialEntry(key, raw)
+	}
+
+	return false, nil
+}
+
+func (v *Value) unmarshalSpecialEntry(key string, raw json.RawMessage) (bool, error) {
+	switch key {
+	case "$state", "$context", "$source", "$event", "$result":
+		var path string
+		if err := json.Unmarshal(raw, &path); err != nil {
+			return true, fmt.Errorf("%w: reference path: %w", ErrInvalidValue, err)
+		}
+
+		v.Kind = ValueKind(key[1:])
+		v.Path = path
+		v.Data = nil
+		return true, v.Validate()
+	}
+
+	if len(key) == 0 || key[0] != '$' {
+		return false, fmt.Errorf("%w: reference path %q", ErrInvalidValue, key)
+	}
+
+	var args []Value
+	if err := json.Unmarshal(raw, &args); err != nil {
+		return false, fmt.Errorf("%w: reference arguments have invalid type", ErrInvalidValue)
+	}
+
+	v.Kind = ValueExpr
+	v.Path = key
+	v.Data = args
+
+	return true, v.Validate()
+}
+
+// UnmarshalJSON decodes a literal, reference, or expression value.
 func (v *Value) UnmarshalJSON(data []byte) error {
 	if v == nil {
 		return fmt.Errorf("%w: nil destination", ErrInvalidValue)
 	}
 
-	var object map[string]json.RawMessage
-	if err := json.Unmarshal(data, &object); err == nil && object != nil {
-		if len(object) == 1 {
-			for key, raw := range object {
-				if key == "$state" || key == "$context" || key == "$source" || key == "$event" || key == "$result" {
-					var path string
-					if err := json.Unmarshal(raw, &path); err != nil {
-						return fmt.Errorf("%w: reference path: %w", ErrInvalidValue, err)
-					}
-
-					v.Kind = ValueKind(key[1:])
-					v.Path = path
-					v.Data = nil
-					return v.Validate()
-				}
-
-				var args []Value
-				if len(key) > 0 && key[0] == '$' && json.Unmarshal(raw, &args) == nil {
-					v.Kind = ValueExpr
-					v.Path = key
-					v.Data = args
-					return v.Validate()
-				}
-			}
-		}
+	handled, err := v.unmarshalSpecial(data)
+	if handled {
+		return err
 	}
 
 	var literal any
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.UseNumber()
-	if err := decoder.Decode(&literal); err != nil {
+	if err = decoder.Decode(&literal); err != nil {
 		return fmt.Errorf("%w: literal: %w", ErrInvalidValue, err)
 	}
 

@@ -16,6 +16,7 @@ import (
 	"go.osspkg.com/ui"
 )
 
+// Capabilities returns the MCP option advertising the UI capability.
 func Capabilities() ossmcp.Option {
 	return ossmcp.WithCapabilities(
 		map[string]any{
@@ -29,6 +30,7 @@ func Capabilities() ossmcp.Option {
 	)
 }
 
+// Register publishes an app manifest and its view resources on server.
 func Register(server *ossmcp.Server, app *ui.App) error {
 	if server == nil || app == nil {
 		return errors.New("ui/mcp: server and app are required")

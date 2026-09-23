@@ -15,17 +15,25 @@ import (
 )
 
 const (
+	// ProtocolVersion is the supported declarative UI protocol version.
 	ProtocolVersion = "1.0"
-	UIMIMEType      = "application/vnd.osspkg.ui+json"
+	// UIMIMEType is the MIME type used for declarative UI resources.
+	UIMIMEType = "application/vnd.osspkg.ui+json"
 )
 
 var (
+	// ErrInvalidSchema reports an invalid manifest or view schema.
 	ErrInvalidSchema = errors.New("invalid ui schema")
+	// ErrInvalidLayout reports an invalid node layout.
 	ErrInvalidLayout = errors.New("invalid ui layout")
-	ErrInvalidValue  = errors.New("invalid ui value")
+	// ErrInvalidValue reports an invalid declarative value.
+	ErrInvalidValue = errors.New("invalid ui value")
 )
 
+// Manifest describes the application entry points exposed to a host.
+//
 //easyjson:json
+//nolint:recvcheck // easyjson generates value marshal and pointer unmarshal methods.
 type Manifest struct {
 	ProtocolVersion    string             `json:"protocolVersion"`
 	Plugin             PluginManifest     `json:"plugin"`
@@ -33,7 +41,10 @@ type Manifest struct {
 	RequiredComponents []string           `json:"requiredComponents,omitempty"`
 }
 
+// PluginManifest identifies the plugin that owns the UI.
+//
 //easyjson:json
+//nolint:recvcheck // easyjson generates value marshal and pointer unmarshal methods.
 type PluginManifest struct {
 	ID          string `json:"id"`
 	Title       string `json:"title"`
@@ -41,7 +52,10 @@ type PluginManifest struct {
 	Description string `json:"description,omitempty"`
 }
 
+// UIViewDescriptor identifies a view schema resource in a manifest.
+//
 //easyjson:json
+//nolint:recvcheck // easyjson generates value marshal and pointer unmarshal methods.
 type UIViewDescriptor struct {
 	ID     string `json:"id"`
 	Title  string `json:"title"`
@@ -49,7 +63,10 @@ type UIViewDescriptor struct {
 	Schema string `json:"schema"`
 }
 
+// ViewSchema is the declarative layout, state, source, and action model for a view.
+//
 //easyjson:json
+//nolint:recvcheck // easyjson generates value marshal and pointer unmarshal methods.
 type ViewSchema struct {
 	ProtocolVersion string                `json:"protocolVersion"`
 	ID              string                `json:"id"`
@@ -61,7 +78,10 @@ type ViewSchema struct {
 	Regions         Regions               `json:"regions"`
 }
 
+// Regions groups view nodes into the host-supported layout regions.
+//
 //easyjson:json
+//nolint:recvcheck // easyjson generates value marshal and pointer unmarshal methods.
 type Regions struct {
 	TopHeader  []Node `json:"top-header"`
 	LeftPanel  []Node `json:"left-panel"`
@@ -70,14 +90,20 @@ type Regions struct {
 	Bottom     []Node `json:"bottom"`
 }
 
+// Layout places a node in a twelve-column row layout.
+//
 //easyjson:json
+//nolint:recvcheck // easyjson generates value marshal and pointer unmarshal methods.
 type Layout struct {
 	Row    int `json:"row"`
 	Cols   int `json:"cols,omitempty"`
 	Offset int `json:"offset,omitempty"`
 }
 
+// Node describes one declarative UI component and its descendants.
+//
 //easyjson:json
+//nolint:recvcheck // easyjson generates value marshal and pointer unmarshal methods.
 type Node struct {
 	ID        string                  `json:"id"`
 	Component string                  `json:"component"`
@@ -89,13 +115,19 @@ type Node struct {
 	When      *Value                  `json:"when,omitempty"`
 }
 
+// EventHandler maps a UI event to an action or sequence of action steps.
+//
 //easyjson:json
+//nolint:recvcheck // easyjson generates value marshal and pointer unmarshal methods.
 type EventHandler struct {
 	Action string       `json:"action,omitempty"`
 	Steps  []ActionStep `json:"steps,omitempty"`
 }
 
+// DataSource describes a host tool used to populate view data.
+//
 //easyjson:json
+//nolint:recvcheck // easyjson generates value marshal and pointer unmarshal methods.
 type DataSource struct {
 	Type      string           `json:"type"`
 	Tool      string           `json:"tool"`
@@ -105,19 +137,28 @@ type DataSource struct {
 	RefreshOn []string         `json:"refreshOn,omitempty"`
 }
 
+// SourcePolicy controls when a data source is fetched.
 type SourcePolicy string
 
 const (
-	SourceManual  SourcePolicy = "manual"
+	// SourceManual fetches the source only when explicitly requested.
+	SourceManual SourcePolicy = "manual"
+	// SourceOnMount fetches the source when the view is mounted.
 	SourceOnMount SourcePolicy = "on-mount"
 )
 
+// CachePolicy controls how long fetched source data may be reused.
+//
 //easyjson:json
+//nolint:recvcheck // easyjson generates value marshal and pointer unmarshal methods.
 type CachePolicy struct {
 	TTL int64 `json:"ttl,omitempty"`
 }
 
+// Action describes a named operation available to the view.
+//
 //easyjson:json
+//nolint:recvcheck // easyjson generates value marshal and pointer unmarshal methods.
 type Action struct {
 	Type    string           `json:"type"`
 	Tool    string           `json:"tool,omitempty"`
@@ -131,14 +172,20 @@ type Action struct {
 	Effects []Effect         `json:"effects,omitempty"`
 }
 
+// ActionStep is one step in an event action sequence.
+//
 //easyjson:json
+//nolint:recvcheck // easyjson generates value marshal and pointer unmarshal methods.
 type ActionStep struct {
 	Type   string           `json:"type"`
 	Action string           `json:"action,omitempty"`
 	Input  map[string]Value `json:"input,omitempty"`
 }
 
+// Effect describes a client-side consequence of an action.
+//
 //easyjson:json
+//nolint:recvcheck // easyjson generates value marshal and pointer unmarshal methods.
 type Effect struct {
 	Type         string `json:"type"`
 	Path         string `json:"path,omitempty"`
@@ -151,6 +198,7 @@ type Effect struct {
 	Message      string `json:"message,omitempty"`
 }
 
+// Validate checks whether the manifest contains valid plugin and view entries.
 func (m Manifest) Validate() error {
 	if m.ProtocolVersion != ProtocolVersion {
 		return fmt.Errorf("%w: unsupported manifest protocol version %q", ErrInvalidSchema, m.ProtocolVersion)

@@ -8,6 +8,17 @@ package dashboard
 
 import "go.osspkg.com/ui"
 
+const (
+	metricsCacheTTL   = 30
+	headerTitleCols   = 9
+	refreshButtonCols = 3
+	refreshButtonPos  = 9
+	metricCardCols    = 6
+	latencyCardOffset = 6
+	eventTableCols    = 12
+	eventTableRow     = 2
+)
+
 // NewApp builds a dashboard whose metrics source is loaded when the view opens.
 func NewApp() (*ui.App, error) {
 	app := ui.New(
@@ -18,22 +29,22 @@ func NewApp() (*ui.App, error) {
 	view := ui.View(
 		"metrics.dashboard",
 		ui.Title("Metrics dashboard"),
-		ui.Source("metrics", ui.Tool("metrics.summary").OnMount().TTL(30)),
+		ui.Source("metrics", ui.Tool("metrics.summary").OnMount().TTL(metricsCacheTTL)),
 		ui.TopHeader(
-			ui.HTML(ui.HTMLH1, "title").Row(1).Cols(9).Prop(
+			ui.HTML(ui.HTMLH1, "title").Row(1).Cols(headerTitleCols).Prop(
 				"text",
 				"Metrics dashboard",
 			),
 			ui.Shadcn(
 				ui.ShadcnButton,
 				"refresh",
-			).Row(1).Cols(3).Offset(9).Prop("text", "Refresh").On(
+			).Row(1).Cols(refreshButtonCols).Offset(refreshButtonPos).Prop("text", "Refresh").On(
 				"click",
 				ui.ActionRef("metrics.refresh"),
 			),
 		),
 		ui.Content(
-			ui.Shadcn(ui.ShadcnCard, "requests-card").Row(1).Cols(6).Children(
+			ui.Shadcn(ui.ShadcnCard, "requests-card").Row(1).Cols(metricCardCols).Children(
 				ui.HTML(ui.HTMLH2, "requests-heading").Prop("text", "Requests"),
 				ui.Shadcn(ui.ShadcnTypography, "requests-value").Prop(
 					"text",
@@ -43,14 +54,14 @@ func NewApp() (*ui.App, error) {
 			ui.Shadcn(
 				ui.ShadcnCard,
 				"latency-card",
-			).Row(1).Cols(6).Offset(6).Children(
+			).Row(1).Cols(metricCardCols).Offset(latencyCardOffset).Children(
 				ui.HTML(ui.HTMLH2, "latency-heading").Prop("text", "Latency"),
 				ui.Shadcn(ui.ShadcnTypography, "latency-value").Prop(
 					"text",
 					ui.SourceRef("metrics.latency"),
 				),
 			),
-			ui.DataTable("recent-events").Row(2).Cols(12).Prop(
+			ui.DataTable("recent-events").Row(eventTableRow).Cols(eventTableCols).Prop(
 				"rows",
 				ui.SourceRef("metrics.events"),
 			).Prop("loading", ui.SourceRef("metrics.$loading")).Prop(

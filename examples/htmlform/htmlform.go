@@ -8,6 +8,11 @@ package htmlform
 
 import "go.osspkg.com/ui"
 
+const (
+	profileCardCols   = 8
+	profileCardOffset = 2
+)
+
 // NewApp builds a profile form with native HTML elements and a local action.
 func NewApp() (*ui.App, error) {
 	app := ui.New(
@@ -28,7 +33,7 @@ func NewApp() (*ui.App, error) {
 			ui.HTML(
 				ui.HTMLArticle,
 				"profile-card",
-			).Row(1).Cols(8).Offset(2).Children(
+			).Row(1).Cols(profileCardCols).Offset(profileCardOffset).Children(
 				ui.HTML(ui.HTMLH1, "title").Prop("text", "Edit profile"),
 				ui.HTML(ui.HTMLP, "hint").Prop(
 					"text",
