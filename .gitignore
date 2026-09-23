@@ -1,4 +1,3 @@
-.github/
 .tools/
 bin/
 vendor/
@@ -18,3 +17,15 @@ coverage.out
 *.test
 *.out
 .env
+
+example/react/dist/
+example/react/node_modules/
+
+react-sdk/ui-transport/dist/
+react-sdk/ui-transport/node_modules/
+
+react-sdk/ui-core/dist/
+react-sdk/ui-core/node_modules/
+
+react-sdk/ui-react/node_modules/
+react-sdk/ui-react/dist/

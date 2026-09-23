@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "noUncheckedSideEffectImports": true,
+    "baseUrl": "..",
+    "paths": {
+      "@osspkg/ui-core": ["packages/ui-core/src/index.ts"],
+      "@osspkg/ui-react": ["packages/ui-react/src/index.ts"],
+      "@osspkg/ui-transport": ["packages/ui-transport/src/index.ts"],
+      "@osspkg/ui-react/styles.css": ["packages/ui-react/src/styles.css.d.ts"]
+    }
+  },
+  "include": ["*.tsx"]
+}
