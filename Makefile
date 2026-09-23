@@ -29,3 +29,7 @@ pre-commit: install license lint tests build
 .PHONY: ci
 ci: pre-commit
 
+.PHONY: examples-dev
+examples-dev:
+	pnpm --filter @osspkg/ui-examples dev
+

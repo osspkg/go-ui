@@ -6,7 +6,7 @@
 // Package dashboard demonstrates shadcn components, grid placement, and data sources.
 package dashboard
 
-import "go.osspkg.com/ui"
+import "go.osspkg.com/ui/go-sdk/ui"
 
 const (
 	metricsCacheTTL   = 30

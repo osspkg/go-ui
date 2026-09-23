@@ -8,7 +8,7 @@ import { createRequestTracker } from "./request.js";
 import { parseManifest, parseView, validateView, SchemaValidationError } from "./validate.js";
 
 function fixture(name: string): unknown {
-  return JSON.parse(readFileSync(new URL(`../../../../fixtures/${name}`, import.meta.url), "utf8")) as unknown;
+  return JSON.parse(readFileSync(new URL(`../../../fixtures/${name}`, import.meta.url), "utf8")) as unknown;
 }
 
 const scope = {

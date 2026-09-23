@@ -8,14 +8,13 @@ The directory is a private workspace package, so React and its JSX runtime are
 installed for the examples themselves. Check it with:
 
 ```bash
-cd react
 pnpm --filter @osspkg/ui-examples typecheck
 ```
 
 To browse the examples locally, run this from the repository root:
 
 ```bash
-make examples-dev
+pnpm --filter @osspkg/ui-examples dev
 ```
 
 Vite prints the local address (normally http://localhost:5173). Use the

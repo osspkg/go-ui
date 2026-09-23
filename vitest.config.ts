@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 export default defineConfig({
   root: fileURLToPath(new URL(".", import.meta.url)),
   test: {
-    include: ["packages/*/src/**/*.test.ts", "packages/*/src/**/*.test.tsx"],
+    include: ["react-sdk/*/src/**/*.test.ts", "react-sdk/*/src/**/*.test.tsx"],
     environment: "node",
   },
 });

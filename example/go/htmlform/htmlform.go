@@ -6,7 +6,7 @@
 // Package htmlform demonstrates a declarative form built from safe HTML tags.
 package htmlform
 
-import "go.osspkg.com/ui"
+import "go.osspkg.com/ui/go-sdk/ui"
 
 const (
 	profileCardCols   = 8

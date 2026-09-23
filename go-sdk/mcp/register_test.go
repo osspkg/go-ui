@@ -5,7 +5,7 @@ import (
 
 	goMCP "go.osspkg.com/mcp"
 
-	"go.osspkg.com/ui"
+	"go.osspkg.com/ui/go-sdk/ui"
 )
 
 func TestUnit_Register(t *testing.T) {

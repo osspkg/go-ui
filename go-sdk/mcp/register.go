@@ -13,7 +13,7 @@ import (
 
 	ossmcp "go.osspkg.com/mcp"
 
-	"go.osspkg.com/ui"
+	"go.osspkg.com/ui/go-sdk/ui"
 )
 
 // Capabilities returns the MCP option advertising the UI capability.

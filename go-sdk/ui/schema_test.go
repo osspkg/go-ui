@@ -177,7 +177,7 @@ func TestUnit_SchemaExpressionDepthLimit(t *testing.T) {
 }
 
 func TestUnit_JSONFixtures(t *testing.T) {
-	valid, err := os.ReadFile("fixtures/valid-view.json")
+	valid, err := os.ReadFile("../../fixtures/valid-view.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -203,7 +203,7 @@ func TestUnit_JSONFixtures(t *testing.T) {
 		t.Fatalf("round-trip JSON differs:\n got: %s\nwant: %s", encoded, valid)
 	}
 
-	invalid, err := os.ReadFile("fixtures/invalid-layout.json")
+	invalid, err := os.ReadFile("../../fixtures/invalid-layout.json")
 	if err != nil {
 		t.Fatal(err)
 	}

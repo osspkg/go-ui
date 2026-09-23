@@ -18,14 +18,14 @@ importers:
         specifier: ^3.2.0
         version: 3.2.7(@types/node@24.13.6)(jiti@2.7.0)(lightningcss@1.32.0)
 
-  examples:
+  example/react:
     dependencies:
       '@osspkg/ui-core':
         specifier: workspace:*
-        version: link:../packages/ui-core
+        version: link:../../react-sdk/ui-core
       '@osspkg/ui-react':
         specifier: workspace:*
-        version: link:../packages/ui-react
+        version: link:../../react-sdk/ui-react
     devDependencies:
       '@types/react':
         specifier: ^19.0.0
@@ -42,13 +42,23 @@ importers:
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
+      typescript:
+        specifier: ^5.9.0
+        version: 5.9.3
       vite:
         specifier: ^7.3.6
         version: 7.3.6(@types/node@24.13.6)(jiti@2.7.0)(lightningcss@1.32.0)
 
-  packages/ui-core: {}
+  react-sdk/ui-core:
+    devDependencies:
+      typescript:
+        specifier: ^5.9.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.0
+        version: 3.2.7(@types/node@24.13.6)(jiti@2.7.0)(lightningcss@1.32.0)
 
-  packages/ui-react:
+  react-sdk/ui-react:
     dependencies:
       '@osspkg/ui-core':
         specifier: workspace:*
@@ -75,12 +85,25 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.3.0(react@19.3.0)
+      typescript:
+        specifier: ^5.9.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.0
+        version: 3.2.7(@types/node@24.13.6)(jiti@2.7.0)(lightningcss@1.32.0)
 
-  packages/ui-transport:
+  react-sdk/ui-transport:
     dependencies:
       '@osspkg/ui-core':
         specifier: workspace:*
         version: link:../ui-core
+    devDependencies:
+      typescript:
+        specifier: ^5.9.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.0
+        version: 3.2.7(@types/node@24.13.6)(jiti@2.7.0)(lightningcss@1.32.0)
 
 packages:
 

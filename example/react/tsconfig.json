@@ -1,15 +1,15 @@
 {
-  "extends": "../tsconfig.base.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "jsx": "react-jsx",
     "noEmit": true,
     "noUncheckedSideEffectImports": true,
-    "baseUrl": "..",
+    "baseUrl": "../..",
     "paths": {
-      "@osspkg/ui-core": ["packages/ui-core/src/index.ts"],
-      "@osspkg/ui-react": ["packages/ui-react/src/index.ts"],
-      "@osspkg/ui-transport": ["packages/ui-transport/src/index.ts"],
-      "@osspkg/ui-react/styles.css": ["packages/ui-react/src/styles.css.d.ts"]
+      "@osspkg/ui-core": ["react-sdk/ui-core/src/index.ts"],
+      "@osspkg/ui-react": ["react-sdk/ui-react/src/index.ts"],
+      "@osspkg/ui-transport": ["react-sdk/ui-transport/src/index.ts"],
+      "@osspkg/ui-react/styles.css": ["react-sdk/ui-react/src/styles.css.d.ts"]
     }
   },
   "include": ["*.tsx"]
