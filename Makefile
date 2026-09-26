@@ -33,3 +33,18 @@ ci: pre-commit
 examples-dev:
 	pnpm --filter @osspkg/ui-examples dev
 
+.PHONY: npm-install
+npm-install:
+	pnpm install --frozen-lockfile
+
+.PHONY: npm-build
+npm-build: npm-install
+	pnpm --filter @osspkg/ui-core build
+	pnpm --filter @osspkg/ui-transport build
+	pnpm --filter @osspkg/ui-react build
+
+.PHONY: npm-publish
+npm-publish: npm-build
+	pnpm --filter @osspkg/ui-core publish --access public
+	pnpm --filter @osspkg/ui-transport publish --access public
+	pnpm --filter @osspkg/ui-react publish --access public
