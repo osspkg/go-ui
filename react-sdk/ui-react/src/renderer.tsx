@@ -61,11 +61,11 @@ function NodeRenderer({ node }: { node: UINode }): ReactNode {
   const slots = renderSlots(node.slots, definition.slots);
   const Component = definition.component as (props: Record<string, unknown>) => ReactElement;
   const layout = node.layout;
-  const layoutStyle = layout ? {
-    "--ui-row": layout.row,
-    "--ui-cols": layout.cols ?? 12,
-    "--ui-start": (layout.offset ?? 0) + 1,
-  } as CSSProperties : undefined;
+  const layoutStyle = {
+    "--ui-row": layout?.row ?? "auto",
+    "--ui-cols": layout?.cols ?? 12,
+    "--ui-start": (layout?.offset ?? 0) + 1,
+  } as CSSProperties;
   return <div data-ui-node={node.id} data-ui-row={layout?.row} data-ui-cols={layout?.cols} data-ui-offset={layout?.offset} className="col-span-[var(--ui-cols)] col-start-[var(--ui-start)] row-start-[var(--ui-row)]" style={layoutStyle}><Component {...props} {...events} {...(slots ? { slots } : {})}>{children}</Component></div>;
 }
 

@@ -40,49 +40,10 @@ textarea {
 
 #root { min-height: 100vh; }
 
-/* Keep the example page readable even when a consuming Vite app does not run
-   Tailwind's CSS transform over imported package stylesheets. */
-.min-h-screen { min-height: 100vh; }
-.bg-ui-muted { background: #f5f6f8; }
-.text-ui-foreground { color: #171717; }
-.px-4 { padding-inline: 1rem; }
-.py-8 { padding-block: 2rem; }
-.sm\:px-8 { padding-inline: 2rem; }
-.sm\:py-12 { padding-block: 3rem; }
-.mx-auto { margin-inline: auto; }
-.flex { display: flex; }
-.w-full { width: 100%; }
-.max-w-6xl { max-width: 72rem; }
-.flex-col { flex-direction: column; }
-.flex-wrap { flex-wrap: wrap; }
-.gap-2 { gap: .5rem; }
-.gap-8 { gap: 2rem; }
-.text-sm { font-size: .875rem; line-height: 1.25rem; }
-.font-medium { font-weight: 500; }
-.font-semibold { font-weight: 600; }
-.tracking-tight { letter-spacing: -.025em; }
-.text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
-.sm\:text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
-.max-w-2xl { max-width: 42rem; }
-.text-ui-muted-foreground { color: #737373; }
-.rounded-xl { border-radius: .75rem; }
-.rounded-md { border-radius: .375rem; }
-.border { border-width: 1px; border-style: solid; }
-.border-ui-border { border-color: #e5e7eb; }
-.bg-ui-card { background: #fff; }
-.p-2 { padding: .5rem; }
-.p-4 { padding: 1rem; }
-.sm\:p-6 { padding: 1.5rem; }
-.shadow-sm { box-shadow: 0 1px 2px rgb(0 0 0 / .06), 0 1px 3px rgb(0 0 0 / .08); }
-.px-3 { padding-inline: .75rem; }
-.py-2 { padding-block: .5rem; }
-.transition-colors { transition: color .15s, background-color .15s, border-color .15s; }
-
 button {
   cursor: pointer;
 }
 
-button:hover { background: #f3f4f6; }
 button[aria-pressed="true"] {
   border-color: #171717;
   background: #171717;
@@ -93,37 +54,7 @@ button:focus-visible, input:focus-visible {
   outline-offset: 2px;
 }
 
-/* The renderer provides semantic data attributes, so layout stays reliable
-   without requiring application-specific utility compilation. */
-[data-ui-region] {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 1rem;
-}
-[data-ui-node] {
-  grid-column: var(--ui-start, span 12) / span var(--ui-cols, 12);
-  grid-row: var(--ui-row, auto);
-  min-width: 0;
-}
 [data-ui-node] h1 { margin: 0 0 1rem; font-size: 1.5rem; line-height: 1.3; font-weight: 650; letter-spacing: -.025em; }
-[data-ui-node] p { margin: .75rem 0 0; line-height: 1.6; }
-[data-ui-node] form { display: grid; gap: .75rem; }
-[data-ui-node] input {
-  width: 100%; box-sizing: border-box; border: 1px solid #d1d5db; border-radius: .5rem;
-  background: #fff; padding: .65rem .75rem; color: #171717;
-}
-[data-ui-node] button:not([aria-pressed]) {
-  width: fit-content; border: 1px solid #171717; border-radius: .5rem; background: #171717;
-  padding: .65rem .9rem; color: #fff; font-weight: 550;
-}
-[data-ui-node] button:not([aria-pressed]):hover { background: #333; }
-
-@media (min-width: 640px) {
-  .sm\:px-8 { padding-inline: 2rem; }
-  .sm\:py-12 { padding-block: 3rem; }
-  .sm\:p-6 { padding: 1.5rem; }
-  .sm\:text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
-}
 
 @media (max-width: 640px) {
   [data-ui-node] { grid-column: 1 / -1; }

@@ -1,9 +1,11 @@
 import { fileURLToPath, URL } from "node:url";
+import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 
 const source = (path: string) => fileURLToPath(new URL(path, import.meta.url));
 
 export default defineConfig({
+  plugins: [tailwindcss()],
   resolve: {
     alias: [
       { find: "@osspkg/ui-react/styles.css", replacement: source("../../react-sdk/ui-react/src/styles.css") },
