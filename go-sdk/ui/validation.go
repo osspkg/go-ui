@@ -23,6 +23,9 @@ const (
 	defaultMaxStrings         = 10000
 	defaultMaxStringLength    = 16 << 10
 	defaultMaxExpressionDepth = 32
+	defaultMaxArrayItems      = 1000
+	defaultMaxObjectKeys      = 256
+	defaultMaxPathLength      = 1024
 
 	actionTypeTool          = "tool"
 	actionTypeSetState      = "set-state"
@@ -43,6 +46,9 @@ type Limits struct {
 	MaxStrings         int
 	MaxStringLength    int
 	MaxExpressionDepth int
+	MaxArrayItems      int
+	MaxObjectKeys      int
+	MaxPathLength      int
 }
 
 // DefaultLimits returns the default schema validation limits.
@@ -57,6 +63,9 @@ func DefaultLimits() Limits {
 		MaxStrings:         defaultMaxStrings,
 		MaxStringLength:    defaultMaxStringLength,
 		MaxExpressionDepth: defaultMaxExpressionDepth,
+		MaxArrayItems:      defaultMaxArrayItems,
+		MaxObjectKeys:      defaultMaxObjectKeys,
+		MaxPathLength:      defaultMaxPathLength,
 	}
 }
 
@@ -189,10 +198,22 @@ func withDefaultLimits(limits Limits) Limits {
 		limits.MaxExpressionDepth = defaults.MaxExpressionDepth
 	}
 
+	if limits.MaxArrayItems <= 0 {
+		limits.MaxArrayItems = defaults.MaxArrayItems
+	}
+
+	if limits.MaxObjectKeys <= 0 {
+		limits.MaxObjectKeys = defaults.MaxObjectKeys
+	}
+
+	if limits.MaxPathLength <= 0 {
+		limits.MaxPathLength = defaults.MaxPathLength
+	}
+
 	return limits
 }
 
-func validateSerializedLimits(schema ViewSchema, limits Limits) error {
+func validateSerializedLimits(schema any, limits Limits) error {
 	encoded, err := json.Marshal(schema)
 	if err != nil {
 		return fmt.Errorf("%w: serialize schema for limits: %w", ErrInvalidSchema, err)
@@ -235,6 +256,10 @@ func walkLimitValue(value any, depth int, limits Limits, count *int) error {
 		}
 
 	case []any:
+		if len(typed) > limits.MaxArrayItems {
+			return errors.New("array item limit exceeded")
+		}
+
 		for _, item := range typed {
 			if err := walkLimitValue(item, depth+1, limits, count); err != nil {
 				return err
@@ -242,7 +267,15 @@ func walkLimitValue(value any, depth int, limits Limits, count *int) error {
 		}
 
 	case map[string]any:
+		if len(typed) > limits.MaxObjectKeys {
+			return errors.New("object key limit exceeded")
+		}
+
 		for key, item := range typed {
+			if key == "__proto__" || key == "prototype" || key == "constructor" {
+				return errors.New("unsafe object key")
+			}
+
 			if err := walkLimitValue(key, depth+1, limits, count); err != nil {
 				return err
 			}
@@ -383,7 +416,7 @@ func validateAction(action Action, limits Limits, view ViewSchema) error {
 	}
 
 	if action.Type == actionTypeSetState || action.Type == actionTypeMergeState {
-		if !safePath(action.Path) {
+		if !safePathWithLimit(action.Path, limits.MaxPathLength) {
 			return errors.New("state action requires a safe path")
 		}
 	}
@@ -394,7 +427,7 @@ func validateAction(action Action, limits Limits, view ViewSchema) error {
 		}
 	}
 
-	if action.Path != "" && !safePath(action.Path) {
+	if action.Path != "" && !safePathWithLimit(action.Path, limits.MaxPathLength) {
 		return errors.New("unsafe action path")
 	}
 
@@ -426,12 +459,12 @@ func validateEffect(effect Effect, limits Limits, view ViewSchema) error {
 		return fmt.Errorf("unsupported effect type %q", effect.Type)
 	}
 
-	if effect.Path != "" && !safePath(effect.Path) {
+	if effect.Path != "" && !safePathWithLimit(effect.Path, limits.MaxPathLength) {
 		return errors.New("unsafe effect path")
 	}
 
 	if effect.Type == actionTypeSetState || effect.Type == actionTypeMergeState {
-		if !safePath(effect.Path) {
+		if !safePathWithLimit(effect.Path, limits.MaxPathLength) {
 			return errors.New("state effect requires a safe path")
 		}
 	}
@@ -466,17 +499,17 @@ func validateValue(value Value, limits Limits, view ViewSchema, depth int) error
 
 	switch value.Kind {
 	case ValueLiteral:
-		return nil
+		return validateLiteralData(value.Data, limits, depth)
 
 	case ValueState, ValueContext, ValueEvent, ValueResult:
-		if !safePath(value.Path) {
+		if !safePathWithLimit(value.Path, limits.MaxPathLength) {
 			return fmt.Errorf("%w: unsafe reference path %q", ErrInvalidValue, value.Path)
 		}
 
 		return nil
 
 	case ValueSource:
-		if !safePath(value.Path) {
+		if !safePathWithLimit(value.Path, limits.MaxPathLength) {
 			return fmt.Errorf("%w: unsafe reference path %q", ErrInvalidValue, value.Path)
 		}
 

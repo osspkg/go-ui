@@ -3,8 +3,10 @@ package ui
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -213,6 +215,62 @@ func TestUnit_JSONFixtures(t *testing.T) {
 	}
 	if err := broken.Validate(); !errors.Is(err, ErrInvalidLayout) {
 		t.Fatalf("invalid fixture error = %v, want ErrInvalidLayout", err)
+	}
+}
+
+func TestUnit_ManifestValidationParity(t *testing.T) {
+	base := Manifest{
+		ProtocolVersion: ProtocolVersion,
+		Plugin:          PluginManifest{ID: "users", Title: "Users", Version: "1.0"},
+		Views:           []UIViewDescriptor{},
+	}
+
+	if err := (Manifest{ProtocolVersion: ProtocolVersion, Plugin: base.Plugin}).Validate(); !errors.Is(err, ErrInvalidSchema) {
+		t.Fatalf("Validate() error = %v, want ErrInvalidSchema for nil views", err)
+	}
+
+	base.RequiredComponents = []string{"/button"}
+	if err := base.Validate(); !errors.Is(err, ErrInvalidSchema) {
+		t.Fatalf("Validate() error = %v, want ErrInvalidSchema for invalid component", err)
+	}
+
+	base.RequiredComponents = nil
+	if err := base.ValidateWithLimits(Limits{MaxBytes: 1}); !errors.Is(err, ErrInvalidSchema) {
+		t.Fatalf("ValidateWithLimits() error = %v, want ErrInvalidSchema for byte limit", err)
+	}
+}
+
+func TestUnit_ValueValidationParity(t *testing.T) {
+	viewWith := func(value Value) ViewSchema {
+		regions := emptyRegions()
+		regions.Content = []Node{{ID: "value", Component: "text", Props: map[string]Value{"value": value}}}
+		return ViewSchema{ProtocolVersion: ProtocolVersion, ID: "values", Regions: regions}
+	}
+
+	tooManyItems := make([]any, DefaultLimits().MaxArrayItems+1)
+	if err := viewWith(Literal(tooManyItems)).Validate(); !errors.Is(err, ErrInvalidSchema) {
+		t.Fatalf("Validate() error = %v, want ErrInvalidSchema for array limit", err)
+	}
+
+	tooManyKeys := make(map[string]any, DefaultLimits().MaxObjectKeys+1)
+	for index := 0; index <= DefaultLimits().MaxObjectKeys; index++ {
+		tooManyKeys[fmt.Sprintf("key-%d", index)] = true
+	}
+	if err := viewWith(Literal(tooManyKeys)).Validate(); !errors.Is(err, ErrInvalidSchema) {
+		t.Fatalf("Validate() error = %v, want ErrInvalidSchema for object limit", err)
+	}
+
+	if err := viewWith(Literal(map[string]any{"__proto__": true})).Validate(); !errors.Is(err, ErrInvalidSchema) {
+		t.Fatalf("Validate() error = %v, want ErrInvalidSchema for unsafe key", err)
+	}
+
+	longPath := strings.Repeat("a", DefaultLimits().MaxPathLength+1)
+	if err := viewWith(StateRef(longPath)).Validate(); !errors.Is(err, ErrInvalidSchema) {
+		t.Fatalf("Validate() error = %v, want ErrInvalidSchema for path limit", err)
+	}
+
+	if err := viewWith(Literal([]any{1, 2})).ValidateWithLimits(Limits{MaxArrayItems: 1}); !errors.Is(err, ErrInvalidSchema) {
+		t.Fatalf("ValidateWithLimits() error = %v, want ErrInvalidSchema for custom array limit", err)
 	}
 }
 

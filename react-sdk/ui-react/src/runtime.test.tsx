@@ -118,6 +118,8 @@ describe("view runtime bindings", () => {
       close: () => undefined,
     };
     const toasts: string[] = [];
+    const refreshedViews: string[] = [];
+    const patchedViews: string[] = [];
     const registry = createComponentRegistry();
     registry.register("button", {
       component: (props: Record<string, unknown>) => {
@@ -134,7 +136,7 @@ describe("view runtime bindings", () => {
           type: "tool",
           tool: "users.save",
           input: { name: { $event: "value" } },
-          effects: [{ type: "toast", variant: "success", message: "Saved" }],
+          effects: [{ type: "toast", variant: "success", message: "Saved" }, { type: "refresh-view", revision: "rev-2" }, { type: "patch-view", baseRevision: "rev-1", revision: "rev-2" }],
         },
       },
       sources: { users: { type: "tool", tool: "users.list", refreshOn: ["save"] } },
@@ -148,7 +150,7 @@ describe("view runtime bindings", () => {
     };
 
     renderToStaticMarkup(
-      <UIProvider components={registry} transport={transport} effects={{ toast: (message) => { toasts.push(message); } }}>
+      <UIProvider components={registry} transport={transport} effects={{ toast: (message) => { toasts.push(message); }, refreshView: (effect) => { refreshedViews.push(effect.type); }, patchView: (effect) => { patchedViews.push(effect.type); } }}>
         <ViewRenderer schema={schema} plugin="users" />
       </UIProvider>,
     );
@@ -159,5 +161,7 @@ describe("view runtime bindings", () => {
       { method: "data.call", params: { plugin: "users", view: "actions", source: "users", operation: "users.list", input: {} } },
     ]);
     expect(toasts).toEqual(["Saved"]);
+    expect(refreshedViews).toEqual(["refresh-view"]);
+    expect(patchedViews).toEqual(["patch-view"]);
   });
 });

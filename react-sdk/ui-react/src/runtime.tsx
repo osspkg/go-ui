@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type Dispatch, type PropsWithChildren, type ReactElement, type SetStateAction } from "react";
-import { createRequestTracker, resolveValue, resolvePath, setPath, type Effect, type ResolveScope, type SourceRuntimeState, type UIValue, type ViewSchema } from "@osspkg/ui-core";
+import { createRequestTracker, resolveValue, resolvePath, setPath, uiRPCMethods, type Effect, type ResolveScope, type SourceRuntimeState, type UIValue, type ViewSchema } from "@osspkg/ui-core";
 import type { RPCTransport } from "@osspkg/ui-transport";
 import { ComponentRegistry } from "./registry.js";
 
@@ -8,6 +8,8 @@ export interface UIEffectHandlers {
   navigate?(to: string): void | Promise<void>;
   dialog?(effect: Effect): void | Promise<void>;
   closeDialog?(effect: Effect): void | Promise<void>;
+  refreshView?(effect: Effect): void | Promise<void>;
+  patchView?(effect: Effect): void | Promise<void>;
 }
 
 export interface UIRuntime {
@@ -88,7 +90,7 @@ export function ViewRuntimeProvider({ schema, plugin, context, children }: Props
     setSources((current) => ({ ...current, [name]: { status: "loading", requestId: String(requestID) } }));
     try {
       const input = resolveValue(source.input ?? {}, { state, context, sources });
-      const data = await base.transport.call("data.call", { plugin, view: schema.id, source: name, operation: source.tool, input }, { signal: controller.signal });
+      const data = await base.transport.call(uiRPCMethods.dataCall, { plugin, view: schema.id, source: name, operation: source.tool, input }, { signal: controller.signal });
       if (!requestIDs.current.isCurrent(name, requestID)) return;
       setSources((current) => ({ ...current, [name]: { status: "success", data, updatedAt: Date.now(), requestId: String(requestID) } }));
     } catch (error) {
@@ -188,7 +190,7 @@ async function executeAction(name: string, schema: ViewSchema, transport: RPCTra
   }
   if (action.type !== "tool" || !transport) throw new Error(`action ${name} requires a transport`);
   const input = resolveValue(action.input ?? {}, scope);
-  const response = await transport.call("ui.action", { plugin, view: schema.id, action: name, input });
+  const response = await transport.call(uiRPCMethods.action, { plugin, view: schema.id, action: name, input });
   for (const effect of action.effects ?? []) await executeEffect(effect, response, scope, handlers, setState, refreshSource);
   await refreshTriggeredSources(name, schema, refreshSource);
   return response;
@@ -219,6 +221,8 @@ async function executeEffect(effect: Effect, result: unknown, scope: ResolveScop
   if (effect.type === "navigate" && effect.to && handlers?.navigate) await handlers.navigate(effect.to);
   if (effect.type === "dialog" && handlers?.dialog) await handlers.dialog(effect);
   if (effect.type === "close-dialog" && handlers?.closeDialog) await handlers.closeDialog(effect);
+  if (effect.type === "refresh-view" && handlers?.refreshView) await handlers.refreshView(effect);
+  if (effect.type === "patch-view" && handlers?.patchView) await handlers.patchView(effect);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

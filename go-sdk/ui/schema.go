@@ -200,17 +200,28 @@ type Effect struct {
 
 // Validate checks whether the manifest contains valid plugin and view entries.
 func (m Manifest) Validate() error {
+	return m.ValidateWithLimits(DefaultLimits())
+}
+
+// ValidateWithLimits checks the manifest against caller-provided limits.
+func (m Manifest) ValidateWithLimits(limits Limits) error {
+	limits = withDefaultLimits(limits)
+
 	if m.ProtocolVersion != ProtocolVersion {
 		return fmt.Errorf("%w: unsupported manifest protocol version %q", ErrInvalidSchema, m.ProtocolVersion)
 	}
 
-	if m.Plugin.ID == "" {
+	if !validName(m.Plugin.ID) {
 		return fmt.Errorf("%w: plugin id is required", ErrInvalidSchema)
+	}
+
+	if m.Views == nil {
+		return fmt.Errorf("%w: manifest views must be an array", ErrInvalidSchema)
 	}
 
 	seen := make(map[string]struct{}, len(m.Views))
 	for _, view := range m.Views {
-		if view.ID == "" || view.Schema == "" {
+		if !validName(view.ID) || view.Schema == "" {
 			return fmt.Errorf("%w: view id and schema are required", ErrInvalidSchema)
 		}
 
@@ -219,6 +230,16 @@ func (m Manifest) Validate() error {
 		}
 
 		seen[view.ID] = struct{}{}
+	}
+
+	for _, component := range m.RequiredComponents {
+		if !validComponentName(component) {
+			return fmt.Errorf("%w: invalid required component %q", ErrInvalidSchema, component)
+		}
+	}
+
+	if err := validateSerializedLimits(m, limits); err != nil {
+		return err
 	}
 
 	return nil

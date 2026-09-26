@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties, type ReactElement, type ReactNode } from "react";
-import type { EventHandler, RegionName, UINode, ViewSchema } from "@osspkg/ui-core";
+import { uiRPCMethods } from "@osspkg/ui-core";
+import type { EventHandler, RegionName, UIGetViewResponse, UINode, ViewSchema } from "@osspkg/ui-core";
 import { validateView } from "@osspkg/ui-core";
 import { useUIRuntime, useUIViewRuntime, ViewRuntimeProvider } from "./runtime.js";
 
@@ -24,7 +25,7 @@ export function PluginView(props: PluginViewProps): ReactElement {
     setError(undefined);
     if (!transport || !props.plugin) return;
     let active = true;
-    void transport.call<{ schema: ViewSchema }>("ui.get", { plugin: props.plugin, view: props.view, context: props.context }).then((response) => {
+    void transport.call<UIGetViewResponse>(uiRPCMethods.getView, { plugin: props.plugin, view: props.view, context: props.context }).then((response) => {
       if (active) setSchema(response.schema);
     }).catch((reason: unknown) => { if (active) setError(reason instanceof Error ? reason : new Error("view loading failed")); });
     return () => { active = false; };

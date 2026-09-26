@@ -11,6 +11,8 @@ export interface ValidationLimits {
   maxStringLength: number;
   maxExpressionDepth: number;
   maxArrayItems: number;
+  maxObjectKeys: number;
+  maxPathLength: number;
 }
 
 export const defaultLimits: ValidationLimits = {
@@ -24,6 +26,8 @@ export const defaultLimits: ValidationLimits = {
   maxStringLength: 16 * 1024,
   maxExpressionDepth: 32,
   maxArrayItems: 1000,
+  maxObjectKeys: 256,
+  maxPathLength: 1024,
 };
 
 export class SchemaValidationError extends Error {
@@ -108,7 +112,8 @@ function validateSource(name: string, source: unknown, view: ViewSchema, limits:
 function validateAction(name: string, action: unknown, view: ViewSchema, limits: ValidationLimits): void {
   if (!isSafeName(name) || !isRecord(action) || !["tool", "set-state", "merge-state", "refresh-source", "invalidate"].includes(action.type)) throw new SchemaValidationError(`action ${name} is invalid`);
   if (action.type === "tool" && !isSafeName(action.tool)) throw new SchemaValidationError(`tool action ${name} requires a tool`);
-  if ((action.type === "set-state" || action.type === "merge-state") && !isSafePath(action.path)) throw new SchemaValidationError(`action ${name} requires a safe path`);
+  if ((action.type === "set-state" || action.type === "merge-state") && !isSafePath(action.path, limits.maxPathLength)) throw new SchemaValidationError(`action ${name} requires a safe path`);
+  if (action.path !== undefined && action.path !== "" && !isSafePath(action.path, limits.maxPathLength)) throw new SchemaValidationError(`action ${name} path is invalid`);
   if ((action.type === "refresh-source" || action.type === "invalidate") && !view.sources?.[action.source as string]) throw new SchemaValidationError(`action ${name} source is invalid`);
   validateValues(action.input, view, limits);
   if (action.value !== undefined) validateValue(action.value, view, limits, 0);
@@ -120,7 +125,8 @@ function validateAction(name: string, action: unknown, view: ViewSchema, limits:
 
 function validateEffect(effect: unknown, view: ViewSchema, limits: ValidationLimits): void {
   if (!isRecord(effect) || !["set-state", "merge-state", "invalidate", "refresh-source", "refresh-view", "patch-view", "navigate", "toast", "dialog", "close-dialog"].includes(effect.type)) throw new SchemaValidationError("effect type is invalid");
-  if ((effect.type === "set-state" || effect.type === "merge-state") && !isSafePath(effect.path)) throw new SchemaValidationError("state effect path is invalid");
+  if ((effect.type === "set-state" || effect.type === "merge-state") && !isSafePath(effect.path, limits.maxPathLength)) throw new SchemaValidationError("state effect path is invalid");
+  if (effect.path !== undefined && effect.path !== "" && !isSafePath(effect.path, limits.maxPathLength)) throw new SchemaValidationError("effect path is invalid");
   if ((effect.type === "invalidate" || effect.type === "refresh-source") && !view.sources?.[effect.source as string]) throw new SchemaValidationError("effect source is invalid");
   if (effect.type === "toast" && !isText(effect.message)) throw new SchemaValidationError("toast effect message is required");
   if (effect.type === "navigate" && !isText(effect.to)) throw new SchemaValidationError("navigate effect target is required");
@@ -138,7 +144,7 @@ function validateNode(node: unknown, region: string, depth: number, view: ViewSc
   if (node.events !== undefined) {
     if (!isRecord(node.events)) throw new SchemaValidationError("node events are invalid");
     for (const [event, handler] of Object.entries(node.events)) {
-      if (!isSafeName(event) || !isRecord(handler) || (!handler.action && !Array.isArray(handler.steps))) throw new SchemaValidationError("event handler is invalid");
+      if (!isSafeName(event) || !isRecord(handler) || (!handler.action && (!Array.isArray(handler.steps) || handler.steps.length === 0))) throw new SchemaValidationError("event handler is invalid");
       if (handler.action && !view.actions?.[handler.action]) throw new SchemaValidationError("event action is not defined");
       if (handler.steps) for (const step of handler.steps) {
         if (!isRecord(step) || step.type !== "action" || !isSafeName(step.action) || !view.actions?.[step.action]) throw new SchemaValidationError("event step is invalid");
@@ -193,16 +199,17 @@ function validateValue(value: unknown, view: ViewSchema, limits: ValidationLimit
   if (!isRecord(value)) throw new SchemaValidationError("value is not JSON-compatible");
   for (const key of Object.keys(value)) if (["__proto__", "prototype", "constructor"].includes(key)) throw new SchemaValidationError("unsafe value key");
   const entries = Object.entries(value);
+  if (entries.length > limits.maxObjectKeys) throw new SchemaValidationError("expression object is too large");
   if (entries.length === 1) {
     const [key, raw] = entries[0]!;
     if (["$state", "$context", "$event", "$result"].includes(key)) {
-      if (!isSafePath(raw)) throw new SchemaValidationError("reference path is unsafe");
+      if (!isSafePath(raw, limits.maxPathLength)) throw new SchemaValidationError("reference path is unsafe");
       return;
     }
     if (key === "$source") {
-      if (!isSafePath(raw)) throw new SchemaValidationError("source path is unsafe");
-      const sourceName = raw.split(".", 1)[0]!;
-      if (!view.sources?.[sourceName]) throw new SchemaValidationError("source reference is not defined");
+      if (!isSafePath(raw, limits.maxPathLength)) throw new SchemaValidationError("source path is unsafe");
+      const sourceName = sourceForPath(raw, view.sources);
+      if (!sourceName) throw new SchemaValidationError("source reference is not defined");
       return;
     }
     const arity = expressionArity[key];
@@ -240,9 +247,12 @@ function walkSerialized(value: unknown, depth: number, limits: ValidationLimits,
     if (value.length > limits.maxStringLength) throw new SchemaValidationError("string length limit exceeded");
     onString();
   } else if (Array.isArray(value)) {
+    if (value.length > limits.maxArrayItems) throw new SchemaValidationError("array item limit exceeded");
     for (const item of value) walkSerialized(item, depth + 1, limits, onString);
   } else if (isRecord(value)) {
+    if (Object.keys(value).length > limits.maxObjectKeys) throw new SchemaValidationError("object key limit exceeded");
     for (const [key, nested] of Object.entries(value)) {
+      if (["__proto__", "prototype", "constructor"].includes(key)) throw new SchemaValidationError("unsafe value key");
       walkSerialized(key, depth + 1, limits, onString);
       walkSerialized(nested, depth + 1, limits, onString);
     }
@@ -265,8 +275,18 @@ function isSafeName(value: unknown): value is string {
   return typeof value === "string" && value.length > 0 && !/[\r\n]/.test(value);
 }
 
-function isSafePath(value: unknown): value is string {
-  return typeof value === "string" && value.length > 0 && value.length <= 1024 && value.split(".").every((segment) => segment.length > 0 && !["__proto__", "prototype", "constructor"].includes(segment));
+function isSafePath(value: unknown, maxLength: number): value is string {
+  return typeof value === "string" && value.length > 0 && value.length <= maxLength && value.split(".").every((segment) => segment.length > 0 && !["__proto__", "prototype", "constructor"].includes(segment));
+}
+
+function sourceForPath(path: string, sources: Record<string, unknown> | undefined): string | undefined {
+  for (let name = path; name; ) {
+    if (sources && Object.prototype.hasOwnProperty.call(sources, name)) return name;
+    const index = name.lastIndexOf(".");
+    if (index < 0) break;
+    name = name.slice(0, index);
+  }
+  return undefined;
 }
 
 function isComponentName(value: unknown): value is string {

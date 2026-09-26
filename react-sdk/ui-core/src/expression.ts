@@ -1,5 +1,5 @@
 import { resolvePath } from "./path.js";
-import type { ResolveScope, UIValue } from "./schema.js";
+import type { ResolveScope, SourceRuntimeState, UIValue } from "./schema.js";
 
 const operators = new Set(["$eq", "$ne", "$gt", "$gte", "$lt", "$lte", "$and", "$or", "$not", "$in", "$exists", "$concat", "$coalesce", "$if"]);
 
@@ -40,16 +40,27 @@ export function resolveValue(value: UIValue, scope: ResolveScope, depth = 0, lim
 }
 
 function resolveSource(path: string, scope: ResolveScope): unknown {
-  const separator = path.indexOf(".");
-  const name = separator < 0 ? path : path.slice(0, separator);
-  const rest = separator < 0 ? "" : path.slice(separator + 1);
-  const source = scope.sources[name];
+  const match = sourceForPath(path, scope.sources);
+  if (!match) return undefined;
+  const source = scope.sources[match.name];
   if (!source) return undefined;
-  if (rest === "$loading") return source.status === "loading";
-  if (rest === "$error") return source.error;
-  if (rest === "$data" || rest === "") return source.data;
-  if (rest === "$updatedAt") return source.updatedAt;
-  return resolvePath(source.data, rest);
+  if (match.rest === "$loading") return source.status === "loading";
+  if (match.rest === "$error") return source.error;
+  if (match.rest === "$data" || match.rest === "") return source.data;
+  if (match.rest === "$updatedAt") return source.updatedAt;
+  return resolvePath(source.data, match.rest);
+}
+
+function sourceForPath(path: string, sources: Record<string, SourceRuntimeState>): { name: string; rest: string } | undefined {
+  for (let name = path; name; ) {
+    if (Object.prototype.hasOwnProperty.call(sources, name)) {
+      return { name, rest: path === name ? "" : path.slice(name.length + 1) };
+    }
+    const index = name.lastIndexOf(".");
+    if (index < 0) break;
+    name = name.slice(0, index);
+  }
+  return undefined;
 }
 
 function evaluateExpression(operator: string, raw: unknown, scope: ResolveScope, depth: number, limits: ExpressionLimits): unknown {

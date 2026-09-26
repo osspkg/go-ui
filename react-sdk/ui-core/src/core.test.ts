@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import type { UIValue } from "./schema.js";
+import type { UIValue, ViewSchema } from "./schema.js";
 import { resolvePath } from "./path.js";
 import { resolveValue, type ExpressionLimits } from "./expression.js";
 import { createStateRuntime } from "./runtime.js";
@@ -152,5 +152,28 @@ describe("ui core", () => {
     expect(runtime.get()).toEqual(_name === "set"
       ? { form: { name: "Grace", valid: false } }
       : { form: { name: "Ada", valid: true } });
+  });
+  it("resolves source names containing dots", () => {
+    const dottedScope = {
+      ...scope,
+      sources: { "orders.list": { status: "success" as const, data: { items: [{ id: 1 }] } } },
+    };
+    expect(resolveValue({ $source: "orders.list.items" }, dottedScope)).toEqual([{ id: 1 }]);
+  });
+
+  it("validates the shared value bounds", () => {
+    const regions = { "top-header": [], "left-panel": [], content: [{ id: "value", component: "text", props: { value: null } }], "right-panel": [], bottom: [] };
+    const view = (value: unknown): ViewSchema => ({ protocolVersion: "1.0", id: "limits", regions: { ...regions, content: [{ id: "value", component: "text", props: { value: value as never } }] } });
+    const tooManyItems = Array.from({ length: 1001 }, () => null);
+    expect(() => validateView(view(tooManyItems))).toThrow(SchemaValidationError);
+    const tooManyKeys = Object.fromEntries(Array.from({ length: 257 }, (_, index) => [`key-${index}`, index]));
+    expect(() => validateView(view(tooManyKeys))).toThrow(SchemaValidationError);
+    expect(() => validateView(view(JSON.parse("{\"__proto__\":true}")))).toThrow(SchemaValidationError);
+  });
+
+  it("rejects empty event step lists and overlong paths", () => {
+    const base = { protocolVersion: "1.0" as const, id: "invalid", regions: { "top-header": [], "left-panel": [], content: [], "right-panel": [], bottom: [] } };
+    expect(() => validateView({ ...base, regions: { ...base.regions, content: [{ id: "button", component: "button", events: { click: { steps: [] } } }] } })).toThrow(SchemaValidationError);
+    expect(() => validateView({ ...base, actions: { save: { type: "set-state", path: "a".repeat(1025), value: true } } })).toThrow(SchemaValidationError);
   });
 });

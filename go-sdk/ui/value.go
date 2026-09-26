@@ -95,7 +95,7 @@ func Expr(operator string, args ...Value) Value {
 func (v Value) Validate() error {
 	switch v.Kind {
 	case ValueLiteral:
-		return nil
+		return validateLiteralData(v.Data, DefaultLimits(), 0)
 
 	case ValueState, ValueContext, ValueSource, ValueEvent, ValueResult:
 		if !safePath(v.Path) {
@@ -231,7 +231,11 @@ func (v *Value) UnmarshalJSON(data []byte) error {
 }
 
 func safePath(path string) bool {
-	if path == "" {
+	return safePathWithLimit(path, defaultMaxPathLength)
+}
+
+func safePathWithLimit(path string, maxLength int) bool {
+	if path == "" || len(path) > maxLength {
 		return false
 	}
 
