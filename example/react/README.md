@@ -26,6 +26,10 @@ buttons at the top of the page to switch between the examples.
 - [`dashboard.tsx`](dashboard.tsx) demonstrates shadcn defaults and the
   12-column `row`/`cols`/`offset` layout.
 
+Each node with children renders them in their own 12-column grid. A child node
+can use `layout` to choose its row, width, and offset within that parent. Nodes
+without a layout fill the available row.
+
 Render one exported component from an application entrypoint, for example:
 
 ```tsx

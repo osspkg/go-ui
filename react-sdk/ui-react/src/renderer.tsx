@@ -57,7 +57,7 @@ function NodeRenderer({ node }: { node: UINode }): ReactNode {
   const rawProps = Object.fromEntries(Object.entries(node.props ?? {}).map(([key, value]) => [key, runtime.resolve(value)]));
   const props = validateProps(rawProps, definition.allowedProps, definition.propsSchema);
   const events = bindEvents(node.events, definition.events, runtime);
-  const children = definition.children === false ? undefined : node.children?.map((child) => <NodeRenderer key={child.id} node={child} />);
+  const children = definition.children === false || !node.children?.length ? undefined : <div data-ui-children={node.id} className="grid grid-cols-12 gap-4">{node.children.map((child) => <NodeRenderer key={child.id} node={child} />)}</div>;
   const slots = renderSlots(node.slots, definition.slots);
   const Component = definition.component as (props: Record<string, unknown>) => ReactElement;
   const layout = node.layout;

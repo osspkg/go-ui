@@ -24,21 +24,22 @@ const schema: ViewSchema = {
         component: "article",
         layout: { row: 1, cols: 8, offset: 2 },
         children: [
-          { id: "heading", component: "h1", props: { text: "Edit profile" } },
+          { id: "heading", component: "h1", layout: { row: 1, cols: 12 }, props: { text: "Edit profile" } },
           {
             id: "profile-form",
             component: "form",
             events: { submit: { action: "save" } },
             children: [
-              { id: "name-label", component: "label", props: { text: "Name" } },
-              { id: "name", component: "input", props: { name: "name", placeholder: "Ada Lovelace" } },
-              { id: "save", component: "button", props: { type: "submit", text: "Save profile" } },
+              { id: "name-label", component: "label", layout: { row: 1, cols: 12 }, props: { text: "Name" } },
+              { id: "name", component: "input", layout: { row: 2, cols: 8, offset: 2 }, props: { name: "name", placeholder: "Ada Lovelace" } },
+              { id: "save", component: "button", layout: { row: 3, cols: 8, offset: 2 }, props: { type: "submit", text: "Save profile" } },
             ],
           },
           {
             id: "confirmation",
             component: "p",
             when: { $eq: [{ $state: "submitted" }, true] },
+            layout: { row: 4, cols: 8, offset: 2 },
             props: { text: "Profile saved." },
           },
         ],

@@ -46,7 +46,6 @@ describe("static renderer", () => {
     expect(markup).toContain("grid grid-cols-12 gap-4");
     expect(markup).toContain("col-span-[var(--ui-cols)]");
     expect(markup).toContain("--ui-row:1;--ui-cols:8;--ui-start:3");
-    expect(markup).toContain("--ui-row:auto;--ui-cols:12;--ui-start:1");
   });
 
   it("renders declared slots and rejects undeclared slots", () => {

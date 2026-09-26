@@ -21,8 +21,8 @@ const schema: ViewSchema = {
         component: "card",
         layout: { row: 1, cols: 8, offset: 2 },
         children: [
-          { id: "title", component: "h1", props: { text: "Welcome" } },
-          { id: "body", component: "p", props: { text: "This view is rendered from a declarative schema." } },
+          { id: "title", component: "h1", layout: { row: 1, cols: 12 }, props: { text: "Welcome" } },
+          { id: "body", component: "p", layout: { row: 2, cols: 8, offset: 2 }, props: { text: "This view is rendered from a declarative schema." } },
         ],
       },
     ],
