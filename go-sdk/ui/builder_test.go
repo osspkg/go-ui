@@ -26,7 +26,7 @@ func TestUnit_BuilderCreatesView(t *testing.T) {
 		t.Fatal(err)
 	}
 	manifest := app.Manifest()
-	if len(manifest.Views) != 1 || manifest.Views[0].ID != "users.list" {
+	if len(manifest.Views) != 1 || manifest.Views[0].ID != "users.list" || manifest.Views[0].Title != "Users" {
 		t.Fatalf("manifest = %#v", manifest)
 	}
 	payload, err := json.Marshal(view.Schema())
@@ -49,6 +49,16 @@ func TestUnit_BuilderCreatesView(t *testing.T) {
 		if string(decoded.Regions[region]) == "null" {
 			t.Fatalf("region %q serialized as null", region)
 		}
+	}
+}
+
+func TestUnit_AppUsesViewIDWhenTitleIsEmpty(t *testing.T) {
+	app := New(AppID("users"), AppTitle("Users"), AppVersion("1.0.0"))
+	if err := app.AddView(View("users.list")); err != nil {
+		t.Fatal(err)
+	}
+	if got := app.Manifest().Views[0].Title; got != "users.list" {
+		t.Fatalf("manifest view title = %q, want users.list", got)
 	}
 }
 

@@ -596,7 +596,7 @@ func validComponentName(value string) bool {
 	}
 
 	for index, char := range value {
-		if (char >= 'a' && char <= 'z') || (char >= '0' && char <= '9' && index > 0) || char == '-' {
+		if (char >= 'a' && char <= 'z') || (char >= '0' && char <= '9' && index > 0) || (char == '-' && index > 0) {
 			continue
 		}
 

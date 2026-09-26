@@ -74,11 +74,15 @@ func (app *App) AddView(view *ViewBuilder) error {
 	}
 
 	app.views[schema.ID] = snapshot
+	title := schema.Title
+	if title == "" {
+		title = schema.ID
+	}
 	app.manifest.Views = append(
 		app.manifest.Views,
 		UIViewDescriptor{
 			ID:     schema.ID,
-			Title:  schema.Title,
+			Title:  title,
 			Schema: "ui://views/" + schema.ID,
 		},
 	)

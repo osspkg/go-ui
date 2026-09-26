@@ -75,13 +75,18 @@ describe("ui core", () => {
   });
 
   it("parses manifests and views only after validation", () => {
-    expect(parseManifest({ protocolVersion: "1.0", plugin: { id: "users", title: "Users", version: "1.0" }, views: [] }).plugin.id).toBe("users");
+    const manifest = { protocolVersion: "1.0", plugin: { id: "users", title: "Users", version: "1.0" }, views: [] };
+    expect(parseManifest(manifest).plugin.id).toBe("users");
+    expect(() => parseManifest({ ...manifest, plugin: { ...manifest.plugin, title: "" } })).toThrow(SchemaValidationError);
+    expect(() => parseManifest({ ...manifest, plugin: { ...manifest.plugin, version: "" } })).toThrow(SchemaValidationError);
+    expect(() => parseManifest({ ...manifest, views: [{ id: "users.list", title: "", schema: "ui://views/users.list" }] })).toThrow(SchemaValidationError);
     expect(parseView({
       protocolVersion: "1.0",
       id: "users.list",
       regions: { "top-header": [], "left-panel": [], content: [], "right-panel": [], bottom: [] },
     }).id).toBe("users.list");
     expect(() => parseView({ protocolVersion: "1.0", id: "broken", regions: { content: [] } })).toThrow(SchemaValidationError);
+    expect(() => parseView({ protocolVersion: "1.0", id: "broken", regions: { "top-header": [], "left-panel": [], content: [{ id: "node", component: "-button" }], "right-panel": [], bottom: [] } })).toThrow(SchemaValidationError);
   });
 
   it("rejects references to unknown sources", () => {

@@ -211,8 +211,8 @@ func (m Manifest) ValidateWithLimits(limits Limits) error {
 		return fmt.Errorf("%w: unsupported manifest protocol version %q", ErrInvalidSchema, m.ProtocolVersion)
 	}
 
-	if !validName(m.Plugin.ID) {
-		return fmt.Errorf("%w: plugin id is required", ErrInvalidSchema)
+	if !validName(m.Plugin.ID) || m.Plugin.Title == "" || m.Plugin.Version == "" {
+		return fmt.Errorf("%w: plugin id, title, and version are required", ErrInvalidSchema)
 	}
 
 	if m.Views == nil {
@@ -221,8 +221,8 @@ func (m Manifest) ValidateWithLimits(limits Limits) error {
 
 	seen := make(map[string]struct{}, len(m.Views))
 	for _, view := range m.Views {
-		if !validName(view.ID) || view.Schema == "" {
-			return fmt.Errorf("%w: view id and schema are required", ErrInvalidSchema)
+		if !validName(view.ID) || view.Title == "" || view.Schema == "" {
+			return fmt.Errorf("%w: view id, title, and schema are required", ErrInvalidSchema)
 		}
 
 		if _, ok := seen[view.ID]; ok {

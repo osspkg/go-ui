@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "UI Actions",
+  "description": "A name-keyed map of actions available to a view.",
+  "type": "object",
+  "propertyNames": { "$ref": "node.schema.json#/$defs/SafeName" },
+  "additionalProperties": { "$ref": "#/$defs/Action" },
+  "$defs": {
+    "SafePath": { "$ref": "node.schema.json#/$defs/SafePath" },
+    "UIValue": { "$ref": "node.schema.json#/$defs/UIValue" },
+    "Action": {
+      "type": "object",
+      "properties": {
+        "type": { "enum": ["tool", "set-state", "merge-state", "refresh-source", "invalidate"] },
+        "tool": { "$ref": "node.schema.json#/$defs/SafeName" },
+        "input": {
+          "type": "object",
+          "additionalProperties": { "$ref": "node.schema.json#/$defs/UIValue" }
+        },
+        "path": { "$ref": "node.schema.json#/$defs/SafePath" },
+        "value": { "$ref": "node.schema.json#/$defs/UIValue" },
+        "source": { "$ref": "node.schema.json#/$defs/SafeName" },
+        "to": { "type": "string" },
+        "variant": { "type": "string" },
+        "message": { "type": "string" },
+        "effects": { "$ref": "effects.schema.json" }
+      },
+      "required": ["type"],
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "tool" } }, "required": ["type"] },
+          "then": { "required": ["tool"] }
+        },
+        {
+          "if": { "properties": { "type": { "enum": ["set-state", "merge-state"] } }, "required": ["type"] },
+          "then": { "required": ["path"] }
+        },
+        {
+          "if": { "properties": { "type": { "enum": ["refresh-source", "invalidate"] } }, "required": ["type"] },
+          "then": { "required": ["source"] }
+        }
+      ]
+    }
+  }
+}

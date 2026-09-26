@@ -57,13 +57,13 @@ export function parseView(input: unknown, limits: Partial<ValidationLimits> = {}
 export function validateManifest(manifest: Manifest, customLimits: Partial<ValidationLimits> = {}): void {
   const limits = withDefaults(customLimits);
   if (!isRecord(manifest) || manifest.protocolVersion !== "1.0") throw new SchemaValidationError("unsupported manifest protocol version");
-  if (!isRecord(manifest.plugin) || !isSafeName(manifest.plugin.id) || !isText(manifest.plugin.title) || !isText(manifest.plugin.version)) {
+  if (!isRecord(manifest.plugin) || !isSafeName(manifest.plugin.id) || !isNonEmptyText(manifest.plugin.title) || !isNonEmptyText(manifest.plugin.version)) {
     throw new SchemaValidationError("manifest plugin metadata is required");
   }
   if (!Array.isArray(manifest.views)) throw new SchemaValidationError("manifest views must be an array");
   const ids = new Set<string>();
   for (const view of manifest.views) {
-    if (!isRecord(view) || !isSafeName(view.id) || !isText(view.title) || !isText(view.schema) || ids.has(view.id)) {
+    if (!isRecord(view) || !isSafeName(view.id) || !isNonEmptyText(view.title) || !isNonEmptyText(view.schema) || ids.has(view.id)) {
       throw new SchemaValidationError("manifest view is invalid");
     }
     ids.add(view.id);
@@ -269,6 +269,10 @@ function isRecord(value: unknown): value is Record<string, any> {
 
 function isText(value: unknown): value is string {
   return typeof value === "string";
+}
+
+function isNonEmptyText(value: unknown): value is string {
+  return typeof value === "string" && value.length > 0;
 }
 
 function isSafeName(value: unknown): value is string {

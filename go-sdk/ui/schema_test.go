@@ -128,6 +128,11 @@ func TestUnit_SemanticValidation(t *testing.T) {
 			regions.Content = []Node{{ID: "n", Component: "@scope/button"}}
 			return (ViewSchema{ProtocolVersion: ProtocolVersion, ID: "users.list", Regions: regions}).Validate()
 		}, want: ErrInvalidSchema},
+		{name: "component name starts with hyphen", value: func() error {
+			regions := emptyRegions()
+			regions.Content = []Node{{ID: "n", Component: "-button"}}
+			return (ViewSchema{ProtocolVersion: ProtocolVersion, ID: "users.list", Regions: regions}).Validate()
+		}, want: ErrInvalidSchema},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -227,6 +232,26 @@ func TestUnit_ManifestValidationParity(t *testing.T) {
 
 	if err := (Manifest{ProtocolVersion: ProtocolVersion, Plugin: base.Plugin}).Validate(); !errors.Is(err, ErrInvalidSchema) {
 		t.Fatalf("Validate() error = %v, want ErrInvalidSchema for nil views", err)
+	}
+
+	base.Views = []UIViewDescriptor{{ID: "users.list", Title: "Users", Schema: "ui://views/users.list"}}
+	invalidManifests := []struct {
+		name string
+		edit func(*Manifest)
+	}{
+		{name: "empty plugin title", edit: func(m *Manifest) { m.Plugin.Title = "" }},
+		{name: "empty plugin version", edit: func(m *Manifest) { m.Plugin.Version = "" }},
+		{name: "empty view title", edit: func(m *Manifest) { m.Views[0].Title = "" }},
+	}
+	for _, test := range invalidManifests {
+		t.Run(test.name, func(t *testing.T) {
+			manifest := base
+			manifest.Views = append([]UIViewDescriptor(nil), base.Views...)
+			test.edit(&manifest)
+			if err := manifest.Validate(); !errors.Is(err, ErrInvalidSchema) {
+				t.Fatalf("Validate() error = %v, want ErrInvalidSchema", err)
+			}
+		})
 	}
 
 	base.RequiredComponents = []string{"/button"}
