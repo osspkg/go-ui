@@ -42,7 +42,11 @@ func TestUnit_RegisterViewWithoutTitle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	app := ui.New(ui.AppID("users"))
+	app := ui.New(
+		ui.AppID("users"),
+		ui.AppTitle("Users"),
+		ui.AppVersion("1.0.0"),
+	)
 	if err := app.AddView(ui.View("users.list")); err != nil {
 		t.Fatal(err)
 	}
