@@ -31,6 +31,25 @@
 - Go 1.26.8 or newer.
 - Node.js and pnpm 12.6.0, as declared by the workspace package manifest.
 
+## Development
+
+Run these commands from the repository root. `make install` installs the pnpm workspace from the lockfile and installs/configures `goppy` for Go workflows.
+
+| Command | What it runs |
+| --- | --- |
+| `make install` | Frozen pnpm dependency install, `goppy@latest` installation, and `goppy setup-lib` |
+| `make npm-build` | Build core, transport, and React packages in dependency order |
+| `make lint` | pnpm lint, formatting, formatting check, and `goppy lint` |
+| `make tests` | pnpm tests and `goppy test` |
+| `make build` | Build the three npm packages, run pnpm typecheck, and run `goppy build --arch=amd64` |
+| `make license` | Run `goppy license` |
+| `make pre-commit` | Run install, license, lint, tests, and build |
+| `make examples-dev` | Start the React example app with Vite |
+
+`make lint` runs `pnpm format`, which can rewrite files. The Go lint and setup workflows can also update generated files. Review `git status` after running them.
+
+`make tests` and `make build` build the npm packages first so package exports resolve in a clean checkout. `make npm-publish` builds those packages before publishing them publicly.
+
 ## Go usage
 
 The root Go module is `go.osspkg.com/ui`. Add it to a Go module with:

@@ -20,7 +20,7 @@ license:
 	goppy license
 
 .PHONY: build
-build:
+build: 
 	pnpm --filter @osspkg/ui-core build
 	pnpm --filter @osspkg/ui-transport build
 	pnpm --filter @osspkg/ui-react build
@@ -28,19 +28,19 @@ build:
 	goppy build --arch=amd64
 
 .PHONY: tests
-tests:
+tests: 
 	pnpm test
 	goppy test
 
 .PHONY: pre-commit
-pre-commit: install license lint tests build
+pre-commit: install license lint build tests 
 
 .PHONY: examples-dev
 examples-dev:
 	pnpm --filter @osspkg/ui-examples dev
 
 .PHONY: npm-publish
-npm-publish: npm-build
+npm-publish: build
 	pnpm --filter @osspkg/ui-core publish --access public
 	pnpm --filter @osspkg/ui-transport publish --access public
 	pnpm --filter @osspkg/ui-react publish --access public

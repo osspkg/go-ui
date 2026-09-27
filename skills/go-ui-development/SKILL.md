@@ -20,11 +20,13 @@ Use this skill for development involving the `go-ui` protocol, Go or React SDKs,
 
 Run from the repository root. The workspace uses Go 1.26.8 and pnpm 12.6.0.
 
-- `make npm-install`: frozen pnpm workspace install.
-- `make npm-build`: build core, transport, and React packages.
+- `make install`: install frozen pnpm dependencies, install `goppy@latest`, and run `goppy setup-lib`.
+- `make lint`: run pnpm lint, rewrite files with `pnpm format`, check formatting, and run `goppy lint`.
+- `make npm-build`: build the core, transport, and React packages in dependency order. `make tests` runs this first, then pnpm tests and `goppy test`.
+- `make build`: build `@osspkg/ui-core`, `@osspkg/ui-transport`, and `@osspkg/ui-react` in order, run pnpm typecheck, and run `goppy build --arch=amd64`.
+- `make license`: run `goppy license`.
+- `make pre-commit`: run install, license, lint, tests, and build in sequence. There is no `make ci` target.
 - `make examples-dev`: start the React example app.
-- `make tests`, `make lint`, `make build`: Go workflows via goppy.
-- `make ci`: setup, license, lint, tests, and build; setup/license steps may modify generated/local files.
 - `pnpm --filter @osspkg/ui-core typecheck|test|build`, likewise `@osspkg/ui-transport` and `@osspkg/ui-react`, for focused package scripts.
 
-Inspect the worktree before workflows that generate or update files. `make npm-publish` publishes all three packages publicly; do not run it unless the user explicitly requests a release.
+Inspect the worktree before running `make install`, `make lint`, or `make pre-commit`: setup, formatting, lint, and build workflows can update local, generated, or formatted files. `make npm-publish` builds and publishes all three packages publicly. Do not run publishing unless the user explicitly requests a release.

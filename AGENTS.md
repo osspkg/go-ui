@@ -15,19 +15,21 @@ Run commands from the repository root:
 
 | Command | Purpose |
 | --- | --- |
-| `make npm-install` | Install the pnpm workspace from the frozen lockfile |
-| `make npm-build` | Build the core, transport, and React npm packages |
+| `make install` | Install frozen pnpm workspace dependencies, install `goppy@latest`, and run `goppy setup-lib` |
+| `make npm-build` | Build core, transport, and React packages in dependency order |
+| `make lint` | Run pnpm lint and formatting, then `goppy lint` |
+| `make tests` | Run pnpm tests, then `goppy test` |
+| `make build` | Build the three npm packages, run pnpm typecheck, then `goppy build --arch=amd64` |
+| `make license` | Run `goppy license` |
+| `make pre-commit` | Run install, license, lint, tests, and build in sequence |
 | `make examples-dev` | Start the Vite React examples |
-| `make tests` | Run the Go test workflow through goppy |
-| `make lint` | Run the Go lint workflow through goppy |
-| `make build` | Run the Go build workflow through goppy |
-| `make ci` | Run `pre-commit` (tool setup, license, lint, tests, and build) |
+| `make npm-publish` | Build and publish the three `@osspkg` packages publicly |
 
 For focused TypeScript workflows, use `pnpm --filter <workspace-package> typecheck`, `test`, or `build` where that script exists. Package names and scripts are defined in each workspace `package.json`.
 
-`make install` installs `goppy@latest` and runs `goppy setup-lib`; `make ci` includes this setup through `pre-commit`. These workflows can update local/generated files, so inspect `git status` and the Makefile before using them when preserving a worktree matters.
+`make install` installs `goppy@latest` and runs `goppy setup-lib`. `make lint` runs `pnpm format`, which rewrites files before checking formatting, and the Go lint workflow may also update generated or formatted files. Inspect `git status` before running these workflows when preserving a worktree matters. `make pre-commit` includes install, license, lint, tests, and build; there is no `make ci` target.
 
-`make npm-publish` publishes all three `@osspkg` packages publicly. Never run a publish command unless the user explicitly asked for a release.
+The `tests` and `build` targets depend on `npm-build` so package exports exist in clean checkouts. `npm-publish` also builds first and publishes publicly. Never run a publish command unless the user explicitly asked for a release.
 
 ## Change guidance
 
