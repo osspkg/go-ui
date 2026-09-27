@@ -33,6 +33,12 @@ const (
 	ValueExpr ValueKind = "expression"
 )
 
+const (
+	unsafePrototypeKey      = "__proto__"
+	unsafePrototypeProperty = "prototype"
+	unsafeConstructorKey    = "constructor"
+)
+
 // Value is a literal, reference, or expression used by the declarative UI model.
 //
 //nolint:recvcheck // JSON values intentionally marshal by value and unmarshal by pointer.
@@ -247,7 +253,7 @@ func safePathWithLimit(path string, maxLength int) bool {
 	}
 
 	for _, part := range strings.Split(path, ".") {
-		if part == "__proto__" || part == "prototype" || part == "constructor" || part == "" {
+		if part == unsafePrototypeKey || part == unsafePrototypeProperty || part == unsafeConstructorKey || part == "" {
 			return false
 		}
 	}

@@ -239,11 +239,7 @@ func (m Manifest) ValidateWithLimits(limits Limits) error {
 		}
 	}
 
-	if err := validateSerializedLimits(m, limits); err != nil {
-		return err
-	}
-
-	return nil
+	return validateSerializedLimits(m, limits)
 }
 
 func validName(name string) bool {

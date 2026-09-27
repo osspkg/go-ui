@@ -285,7 +285,7 @@ func TestUnit_ValueValidationParity(t *testing.T) {
 		t.Fatalf("Validate() error = %v, want ErrInvalidSchema for object limit", err)
 	}
 
-	if err := viewWith(Literal(map[string]any{"__proto__": true})).Validate(); !errors.Is(err, ErrInvalidSchema) {
+	if err := viewWith(Literal(map[string]any{unsafePrototypeKey: true})).Validate(); !errors.Is(err, ErrInvalidSchema) {
 		t.Fatalf("Validate() error = %v, want ErrInvalidSchema for unsafe key", err)
 	}
 

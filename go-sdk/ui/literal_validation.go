@@ -1,6 +1,6 @@
 /*
  *  Copyright (c) 2026 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
- *  Use of this source code is governed by a BSD-3-Clause license that can be found in the LICENSE file.
+ *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
 package ui
@@ -52,7 +52,7 @@ func validateLiteralJSON(value any, limits Limits, depth int) error {
 			return errors.New("expression object limit exceeded")
 		}
 		for key, item := range typed {
-			if key == "__proto__" || key == "prototype" || key == "constructor" {
+			if key == unsafePrototypeKey || key == unsafePrototypeProperty || key == unsafeConstructorKey {
 				return errors.New("unsafe object key")
 			}
 			if err := validateLiteralJSON(item, limits, depth+1); err != nil {

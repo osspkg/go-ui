@@ -274,7 +274,7 @@ func walkLimitValue(value any, depth int, limits Limits, count *int) error {
 		}
 
 		for key, item := range typed {
-			if key == "__proto__" || key == "prototype" || key == "constructor" {
+			if key == unsafePrototypeKey || key == unsafePrototypeProperty || key == unsafeConstructorKey {
 				return errors.New("unsafe object key")
 			}
 

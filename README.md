@@ -15,16 +15,16 @@
 
 ## Repository layout
 
-| Path | Description |
-| --- | --- |
-| [`go-sdk/ui`](go-sdk/ui) | Go schema types, builders, validation, and component definitions |
-| [`go-sdk/mcp`](go-sdk/mcp) | Adapter that registers the UI manifest and views as MCP resources |
-| [`react-sdk/ui-core`](react-sdk/ui-core) | TypeScript protocol types, validation, and runtime helpers |
-| [`react-sdk/ui-transport`](react-sdk/ui-transport) | HTTP, WebSocket, and RPC transport helpers |
-| [`react-sdk/ui-react`](react-sdk/ui-react) | React renderer, registries, and default components |
-| [`example/go`](example/go) | Go examples for an HTML form and dashboard |
-| [`example/react`](example/react) | Vite app with interactive React examples |
-| [`schemas`](schemas) | JSON Schema documents for protocol entities |
+| Path                                               | Description                                                       |
+| -------------------------------------------------- | ----------------------------------------------------------------- |
+| [`go-sdk/ui`](go-sdk/ui)                           | Go schema types, builders, validation, and component definitions  |
+| [`go-sdk/mcp`](go-sdk/mcp)                         | Adapter that registers the UI manifest and views as MCP resources |
+| [`react-sdk/ui-core`](react-sdk/ui-core)           | TypeScript protocol types, validation, and runtime helpers        |
+| [`react-sdk/ui-transport`](react-sdk/ui-transport) | HTTP, WebSocket, and RPC transport helpers                        |
+| [`react-sdk/ui-react`](react-sdk/ui-react)         | React renderer, registries, and default components                |
+| [`example/go`](example/go)                         | Go examples for an HTML form and dashboard                        |
+| [`example/react`](example/react)                   | Vite app with interactive React examples                          |
+| [`schemas`](schemas)                               | JSON Schema documents for protocol entities                       |
 
 ## Requirements
 
@@ -150,43 +150,6 @@ export function WelcomeView() {
 ```
 
 Nodes with children create their own 12-column grid. Set a child's `layout` to control its row, width (`cols`), and horizontal offset; nodes without a layout use the available row. The [interactive example](example/react/README.md) demonstrates forms, default registries, and nested layouts.
-
-## Development
-
-Install the JavaScript workspace dependencies and build the publishable React packages:
-
-```bash
-make npm-install
-make npm-build
-```
-
-Run the interactive example with:
-
-```bash
-make examples-dev
-```
-
-Check and format the React SDK and example sources with:
-
-```bash
-make npm-lint
-make npm-format-check
-make npm-format
-```
-
-`make npm-lint` applies the Airbnb JavaScript/React rules with TypeScript and React Hooks compatibility adjustments. `make npm-format` applies Prettier; use `make npm-format-check` in CI or before committing to verify formatting without changing files. These targets are separate from `make lint`, which runs the Go linter.
-
-The Makefile also provides `make tests`, `make lint`, `make build`, and `make ci` for Go project workflows. `make ci` runs the `pre-commit` prerequisites, including dependency/tool setup and generated license work; consult the [Makefile](Makefile) before running it.
-
-## Packages
-
-The JavaScript workspace contains three publishable packages, currently version `0.1.0`:
-
-- [`@osspkg/ui-core`](react-sdk/ui-core/package.json)
-- [`@osspkg/ui-transport`](react-sdk/ui-transport/package.json)
-- [`@osspkg/ui-react`](react-sdk/ui-react/package.json)
-
-`make npm-publish` builds and publishes these packages to the public npm registry. Run it only as part of an intentional release.
 
 ## License
 

@@ -5,11 +5,13 @@ import (
 	"testing"
 )
 
+const usersListViewID = "users.list"
+
 func TestUnit_BuilderCreatesView(t *testing.T) {
 	view := View(
-		"users.list",
+		usersListViewID,
 		Title("Users"),
-		Source("users", Tool("users.list").OnMount()),
+		Source("users", Tool(usersListViewID).OnMount()),
 		Content(
 			DataTable("users-table").Row(1).Cols(12).Prop(
 				"rows",
@@ -26,7 +28,7 @@ func TestUnit_BuilderCreatesView(t *testing.T) {
 		t.Fatal(err)
 	}
 	manifest := app.Manifest()
-	if len(manifest.Views) != 1 || manifest.Views[0].ID != "users.list" || manifest.Views[0].Title != "Users" {
+	if len(manifest.Views) != 1 || manifest.Views[0].ID != usersListViewID || manifest.Views[0].Title != "Users" {
 		t.Fatalf("manifest = %#v", manifest)
 	}
 	payload, err := json.Marshal(view.Schema())
@@ -54,16 +56,16 @@ func TestUnit_BuilderCreatesView(t *testing.T) {
 
 func TestUnit_AppUsesViewIDWhenTitleIsEmpty(t *testing.T) {
 	app := New(AppID("users"), AppTitle("Users"), AppVersion("1.0.0"))
-	if err := app.AddView(View("users.list")); err != nil {
+	if err := app.AddView(View(usersListViewID)); err != nil {
 		t.Fatal(err)
 	}
-	if got := app.Manifest().Views[0].Title; got != "users.list" {
+	if got := app.Manifest().Views[0].Title; got != usersListViewID {
 		t.Fatalf("manifest view title = %q, want users.list", got)
 	}
 }
 
 func TestUnit_AppSnapshotsViews(t *testing.T) {
-	view := View("users.list", Title("Users")).Action(
+	view := View(usersListViewID, Title("Users")).Action(
 		"initial",
 		CallTool("initial"),
 	)
@@ -74,18 +76,18 @@ func TestUnit_AppSnapshotsViews(t *testing.T) {
 
 	manifest := app.Manifest()
 	manifest.Views[0].ID = "changed"
-	if got := app.Manifest().Views[0].ID; got != "users.list" {
+	if got := app.Manifest().Views[0].ID; got != usersListViewID {
 		t.Fatalf("stored manifest view id = %q, want users.list", got)
 	}
 
 	view.Action("late", CallTool("late"))
-	returned, ok := app.View("users.list")
+	returned, ok := app.View(usersListViewID)
 	if !ok {
 		t.Fatal("view is missing")
 	}
 	returned.Actions["returned"] = Action{Type: "tool", Tool: "returned"}
 
-	stored, ok := app.View("users.list")
+	stored, ok := app.View(usersListViewID)
 	if !ok {
 		t.Fatal("view is missing after mutation")
 	}
