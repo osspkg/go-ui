@@ -1,17 +1,26 @@
 {
   "name": "@osspkg/ui-transport",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "type": "module",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "exports": {".": {"types": "./dist/index.d.ts", "import": "./dist/index.js"}},
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "vitest run --config vitest.config.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
-  "dependencies": {"@osspkg/ui-core": "workspace:*"},
+  "dependencies": {
+    "@osspkg/ui-core": "workspace:*"
+  },
   "devDependencies": {
     "typescript": "^5.9.0",
     "vitest": "^3.2.0"

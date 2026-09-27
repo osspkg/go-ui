@@ -39,8 +39,14 @@ pre-commit: install license lint build tests
 examples-dev:
 	pnpm --filter @osspkg/ui-examples dev
 
+.PHONY: npm-version-patch
+npm-version-patch:
+	cd react-sdk/ui-core && npm version patch --no-git-tag-version
+	cd react-sdk/ui-transport && npm version patch --no-git-tag-version
+	cd react-sdk/ui-react && npm version patch --no-git-tag-version
+
 .PHONY: npm-publish
-npm-publish: build
+npm-publish: build npm-version-patch
 	pnpm --filter @osspkg/ui-core publish --access public
 	pnpm --filter @osspkg/ui-transport publish --access public
 	pnpm --filter @osspkg/ui-react publish --access public
