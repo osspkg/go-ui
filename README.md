@@ -1,6 +1,6 @@
 # go-ui
 
-[![Go Reference](https://pkg.go.dev/badge/go.osspkg.com/ui.svg)](https://pkg.go.dev/go.osspkg.com/ui)
+[![Go Reference](https://pkg.go.dev/badge/go.osspkg.com/ui/go-sdk/ui.svg)](https://pkg.go.dev/go.osspkg.com/ui/go-sdk/ui)
 
 `go-ui` is a declarative UI protocol and SDK for describing plugin interfaces as JSON schemas. The Go SDK builds and validates manifests and views; the React SDK validates those schemas and renders them with registered HTML and shadcn components. The UI model is independent of the transport, with an MCP adapter available in `go-sdk/mcp`.
 
@@ -33,7 +33,13 @@
 
 ## Go usage
 
-The root Go module is `go.osspkg.com/ui`. This example builds a profile view with a card and individually positioned child nodes:
+The root Go module is `go.osspkg.com/ui`. Add it to a Go module with:
+
+```bash
+go get go.osspkg.com/ui
+```
+
+This example builds a profile view with a card and individually positioned child nodes:
 
 ```go
 package main
@@ -63,7 +69,28 @@ func newProfileApp() (*ui.App, error) {
 }
 ```
 
-For an MCP server, pass the app to `go-sdk/mcp.Register` and add `go-sdk/mcp.Capabilities()` to the server options. See the [dashboard example](example/go/dashboard/dashboard.go) for sources, actions, and effects, and the [MCP adapter](go-sdk/mcp/register.go) for resource registration.
+To expose the manifest and views as MCP resources, register the app with the MCP adapter:
+
+```go
+import (
+    goMCP "go.osspkg.com/mcp"
+    "go.osspkg.com/ui/go-sdk/ui"
+    uiMCP "go.osspkg.com/ui/go-sdk/mcp"
+)
+
+func registerUI(app *ui.App) error {
+    server, err := goMCP.New(
+        goMCP.ServerInfo{Name: "profile", Version: "1.0.0"},
+        uiMCP.Capabilities(),
+    )
+    if err != nil {
+        return err
+    }
+    return uiMCP.Register(server, app)
+}
+```
+
+The adapter publishes resources; a host that uses the React runtime must separately handle `ui.get`, `data.call`, and `ui.action`. See the [dashboard example](example/go/dashboard/dashboard.go) for sources, actions, and effects.
 
 ## React usage
 

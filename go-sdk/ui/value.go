@@ -25,9 +25,12 @@ const (
 	ValueContext ValueKind = "context"
 	// ValueSource references source data.
 	ValueSource ValueKind = "source"
-	ValueEvent  ValueKind = "event"
+	// ValueEvent references the current event payload.
+	ValueEvent ValueKind = "event"
+	// ValueResult references the result produced by a preceding action step.
 	ValueResult ValueKind = "result"
-	ValueExpr   ValueKind = "expression"
+	// ValueExpr represents an expression evaluated by the UI runtime.
+	ValueExpr ValueKind = "expression"
 )
 
 // Value is a literal, reference, or expression used by the declarative UI model.
@@ -87,6 +90,7 @@ func ResultRef(path string) Value {
 }
 
 // Expr creates a value representing an expression operator and its arguments.
+// The operator must be supported by Validate; argument count is checked there.
 func Expr(operator string, args ...Value) Value {
 	return Value{Kind: ValueExpr, Path: operator, Data: append([]Value(nil), args...)}
 }
@@ -136,7 +140,8 @@ func (v Value) Validate() error {
 	}
 }
 
-// MarshalJSON encodes the value in the declarative UI wire format.
+// MarshalJSON encodes the value in the declarative UI wire format. Invalid
+// values return an error wrapping ErrInvalidValue.
 func (v Value) MarshalJSON() ([]byte, error) {
 	if err := v.Validate(); err != nil {
 		return nil, err
@@ -205,7 +210,9 @@ func (v *Value) unmarshalSpecialEntry(key string, raw json.RawMessage) (bool, er
 	return true, v.Validate()
 }
 
-// UnmarshalJSON decodes a literal, reference, or expression value.
+// UnmarshalJSON decodes a literal, reference, or expression value. Special
+// objects must use one recognized reference or expression operator; decoded
+// references and expressions are validated before they are stored.
 func (v *Value) UnmarshalJSON(data []byte) error {
 	if v == nil {
 		return fmt.Errorf("%w: nil destination", ErrInvalidValue)

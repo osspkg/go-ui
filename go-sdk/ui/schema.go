@@ -198,12 +198,13 @@ type Effect struct {
 	Message      string `json:"message,omitempty"`
 }
 
-// Validate checks whether the manifest contains valid plugin and view entries.
+// Validate checks the manifest against DefaultLimits.
 func (m Manifest) Validate() error {
 	return m.ValidateWithLimits(DefaultLimits())
 }
 
-// ValidateWithLimits checks the manifest against caller-provided limits.
+// ValidateWithLimits checks the manifest against limits. Any non-positive
+// limit field is replaced with its DefaultLimits value.
 func (m Manifest) ValidateWithLimits(limits Limits) error {
 	limits = withDefaultLimits(limits)
 

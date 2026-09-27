@@ -57,7 +57,8 @@ func New(options ...AppOption) *App {
 	return app
 }
 
-// AddView validates and registers a view in the application.
+// AddView validates and registers a snapshot of view in the application.
+// It returns ErrInvalidSchema when the view ID is already registered.
 func (app *App) AddView(view *ViewBuilder) error {
 	schema := view.Schema()
 	if err := schema.Validate(); err != nil {
@@ -95,12 +96,15 @@ func (app *App) Manifest() Manifest {
 	return cloneManifest(app.manifest)
 }
 
-// ManifestJSON serializes a copy of the application manifest.
+// ManifestJSON serializes the application manifest as JSON. It returns an
+// error if the manifest contains a value that cannot be encoded.
 func (app *App) ManifestJSON() ([]byte, error) {
 	return json.Marshal(app.Manifest())
 }
 
-// View returns a copy of a registered view by ID.
+// View returns a copy of the registered view with id. The boolean is false
+// when no view is registered under that ID or the stored schema cannot be
+// cloned.
 func (app *App) View(id string) (ViewSchema, bool) {
 	view, ok := app.views[id]
 	if !ok {
@@ -230,24 +234,26 @@ func Bottom(nodes ...*NodeBuilder) ViewOption {
 	}
 }
 
-// Action adds a named action to the view.
+// Action adds or replaces the named action in the view.
 func (view *ViewBuilder) Action(name string, action *ActionBuilder) *ViewBuilder {
 	view.schema.Actions[name] = action.action
 	return view
 }
 
-// Schema returns the current view schema.
+// Schema returns the current view schema. The returned value shares its maps
+// and slices with the builder; use it as a read-only snapshot unless you
+// intend to change the builder's data.
 func (view *ViewBuilder) Schema() ViewSchema {
 	return view.schema
 }
 
-// Revision sets the view revision.
+// Revision sets the revision identifier used to distinguish view versions.
 func (view *ViewBuilder) Revision(value string) *ViewBuilder {
 	view.schema.Revision = value
 	return view
 }
 
-// Source adds a named data source to the view.
+// Source adds or replaces the named data source in the view.
 func (view *ViewBuilder) Source(name string, source *SourceBuilder) *ViewBuilder {
 	view.schema.Sources[name] = source.source
 	return view
@@ -323,7 +329,9 @@ func (node *NodeBuilder) When(value Value) *NodeBuilder {
 	return node
 }
 
-// Build returns the current node value.
+// Build returns the current node value. The returned node shares maps and
+// slices with the builder; use it as a read-only snapshot unless you intend to
+// change the builder's data.
 func (node *NodeBuilder) Build() Node {
 	return node.node
 }
@@ -381,7 +389,8 @@ func (source *SourceBuilder) OnMount() *SourceBuilder {
 	return source
 }
 
-// TTL sets the source cache lifetime in seconds.
+// TTL sets the source cache lifetime in seconds. A negative value is retained
+// by the builder but causes view validation to fail.
 func (source *SourceBuilder) TTL(value int64) *SourceBuilder {
 	source.source.Cache = &CachePolicy{TTL: value}
 	return source
@@ -401,7 +410,7 @@ func CallTool(name string) *ActionBuilder {
 	}
 }
 
-// SetState creates an action that replaces a state path.
+// SetState creates an action that replaces a state path with value.
 func SetState(path string, value any) *ActionBuilder {
 	return &ActionBuilder{
 		action: Action{
@@ -412,7 +421,7 @@ func SetState(path string, value any) *ActionBuilder {
 	}
 }
 
-// MergeState creates an action that merges a value into a state path.
+// MergeState creates an action that merges value into a state path.
 func MergeState(path string, value any) *ActionBuilder {
 	return &ActionBuilder{
 		action: Action{

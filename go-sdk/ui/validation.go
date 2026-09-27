@@ -35,7 +35,8 @@ const (
 	actionStepTypeAction    = "action"
 )
 
-// Limits bounds the size and complexity of a view schema.
+// Limits bounds the size and complexity of a manifest or view schema. Fields
+// set to zero or less use the corresponding DefaultLimits value.
 type Limits struct {
 	MaxBytes           int
 	MaxNodes           int
@@ -51,7 +52,7 @@ type Limits struct {
 	MaxPathLength      int
 }
 
-// DefaultLimits returns the default schema validation limits.
+// DefaultLimits returns the default bounds used by schema validation.
 func DefaultLimits() Limits {
 	return Limits{
 		MaxBytes:           defaultMaxBytes,
@@ -69,12 +70,13 @@ func DefaultLimits() Limits {
 	}
 }
 
-// Validate checks the schema against the default validation limits.
+// Validate checks the view schema against DefaultLimits.
 func (v ViewSchema) Validate() error {
 	return v.ValidateWithLimits(DefaultLimits())
 }
 
-// ValidateWithLimits checks the schema against caller-provided limits.
+// ValidateWithLimits checks the view schema against limits. Any non-positive
+// limit field is replaced with its DefaultLimits value.
 func (v ViewSchema) ValidateWithLimits(limits Limits) error {
 	limits = withDefaultLimits(limits)
 
@@ -376,7 +378,9 @@ func (context *validationContext) validateNode(node Node, region string, depth i
 	return nil
 }
 
-// Validate checks whether the layout fits the specified region.
+// Validate checks whether the layout fits region. Side panels accept only a
+// positive row and require columns and offset to be zero; other regions use a
+// twelve-column grid.
 func (l Layout) Validate(region string) error {
 	if l.Row < 1 {
 		return fmt.Errorf("%w: row must be positive", ErrInvalidLayout)
