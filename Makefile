@@ -44,6 +44,7 @@ npm-version-patch:
 	cd react-sdk/ui-core && npm version patch --no-git-tag-version
 	cd react-sdk/ui-transport && npm version patch --no-git-tag-version
 	cd react-sdk/ui-react && npm version patch --no-git-tag-version
+	git add . && git commit -m "update lib version"
 
 .PHONY: npm-publish
 npm-publish: build npm-version-patch
