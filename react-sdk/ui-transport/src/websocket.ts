@@ -1,4 +1,10 @@
-import { createRequest, readResponse, type CallOptions, type RPCNotification, type RPCTransport } from "./rpc.js";
+import {
+  createRequest,
+  readResponse,
+  type CallOptions,
+  type RPCNotification,
+  type RPCTransport,
+} from "./rpc.js";
 
 interface SocketLike {
   readyState: number;
@@ -40,7 +46,10 @@ export class WebSocketTransport implements RPCTransport {
   private reconnectTimer: ReturnType<typeof setTimeout> | undefined;
   private hasConnected = false;
 
-  constructor(private readonly endpoint: string, private readonly options: WebSocketTransportOptions = {}) {
+  constructor(
+    private readonly endpoint: string,
+    private readonly options: WebSocketTransportOptions = {},
+  ) {
     this.Socket = options.socket ?? (WebSocket as unknown as SocketConstructor);
   }
 
@@ -50,12 +59,17 @@ export class WebSocketTransport implements RPCTransport {
     const request = createRequest(method, params);
     const timeoutMs = callOptions.timeoutMs ?? this.options.timeoutMs ?? 30_000;
     return new Promise<T>((resolve, reject) => {
-      const pending: PendingCall = { resolve, reject, timer: setTimeout(() => {
-        if (this.pending.get(request.id) !== pending) return;
-        this.pending.delete(request.id);
-        this.cleanupPending(pending);
-        reject(new Error("rpc request timed out"));
-      }, timeoutMs), ...(callOptions.signal ? { signal: callOptions.signal } : {}) };
+      const pending: PendingCall = {
+        resolve,
+        reject,
+        timer: setTimeout(() => {
+          if (this.pending.get(request.id) !== pending) return;
+          this.pending.delete(request.id);
+          this.cleanupPending(pending);
+          reject(new Error("rpc request timed out"));
+        }, timeoutMs),
+        ...(callOptions.signal ? { signal: callOptions.signal } : {}),
+      };
       const abort = () => {
         if (this.pending.get(request.id) !== pending) return;
         this.pending.delete(request.id);
@@ -141,7 +155,11 @@ export class WebSocketTransport implements RPCTransport {
 
   private handleMessage(data: string): void {
     let message: unknown;
-    try { message = JSON.parse(data); } catch { return; }
+    try {
+      message = JSON.parse(data);
+    } catch {
+      return;
+    }
     if (!message || typeof message !== "object") return;
     const record = message as { id?: unknown; method?: unknown };
     if (typeof record.id === "number") {
@@ -149,10 +167,15 @@ export class WebSocketTransport implements RPCTransport {
       if (!pending) return;
       this.pending.delete(record.id);
       this.cleanupPending(pending);
-      try { pending.resolve(readResponse(message, record.id)); } catch (error) { pending.reject(error); }
+      try {
+        pending.resolve(readResponse(message, record.id));
+      } catch (error) {
+        pending.reject(error);
+      }
       return;
     }
-    if (typeof record.method === "string") for (const listener of this.listeners) listener(message as RPCNotification);
+    if (typeof record.method === "string")
+      for (const listener of this.listeners) listener(message as RPCNotification);
   }
 
   private scheduleReconnect(): void {

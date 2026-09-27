@@ -52,13 +52,19 @@ describe("WebSocketTransport", () => {
     await expect(result).resolves.toEqual({ ok: true });
 
     socket.receive({ jsonrpc: "2.0", method: "ui.invalidate", params: { view: "users" } });
-    expect(notifications).toEqual([{ jsonrpc: "2.0", method: "ui.invalidate", params: { view: "users" } }]);
+    expect(notifications).toEqual([
+      { jsonrpc: "2.0", method: "ui.invalidate", params: { view: "users" } },
+    ]);
     transport.close();
   });
 
   it("reconnects and notifies the runtime after a new socket opens", async () => {
     vi.useFakeTimers();
-    const transport = new WebSocketTransport("wss://example.test/rpc", { socket: FakeSocket, reconnect: true, reconnectDelayMs: 10 });
+    const transport = new WebSocketTransport("wss://example.test/rpc", {
+      socket: FakeSocket,
+      reconnect: true,
+      reconnectDelayMs: 10,
+    });
     const reconnected = vi.fn();
     transport.onReconnect(reconnected);
     const result = transport.call("ping", {});
@@ -79,7 +85,10 @@ describe("WebSocketTransport", () => {
   });
 
   it("rejects a call when the socket closes before opening", async () => {
-    const transport = new WebSocketTransport("wss://example.test/rpc", { socket: FakeSocket, reconnect: true });
+    const transport = new WebSocketTransport("wss://example.test/rpc", {
+      socket: FakeSocket,
+      reconnect: true,
+    });
     const result = transport.call("ping", {});
     FakeSocket.instances[0]!.close();
 

@@ -13,6 +13,8 @@ describe("ComponentRegistry", () => {
   it("rejects duplicate logical component names", () => {
     const registry = createComponentRegistry();
     registry.register("text", { component: () => null });
-    expect(() => registry.register("text", { component: () => null })).toThrow("already registered");
+    expect(() => registry.register("text", { component: () => null })).toThrow(
+      "already registered",
+    );
   });
 });

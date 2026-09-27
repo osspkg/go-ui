@@ -166,6 +166,16 @@ Run the interactive example with:
 make examples-dev
 ```
 
+Check and format the React SDK and example sources with:
+
+```bash
+make npm-lint
+make npm-format-check
+make npm-format
+```
+
+`make npm-lint` applies the Airbnb JavaScript/React rules with TypeScript and React Hooks compatibility adjustments. `make npm-format` applies Prettier; use `make npm-format-check` in CI or before committing to verify formatting without changing files. These targets are separate from `make lint`, which runs the Go linter.
+
 The Makefile also provides `make tests`, `make lint`, `make build`, and `make ci` for Go project workflows. `make ci` runs the `pre-commit` prerequisites, including dependency/tool setup and generated license work; consult the [Makefile](Makefile) before running it.
 
 ## Packages

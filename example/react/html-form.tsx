@@ -1,5 +1,11 @@
 import type { ReactElement } from "react";
-import { createComponentRegistry, registerDefaultHTMLComponents, registerDefaultShadcnComponents, UIProvider, ViewRenderer } from "@osspkg/ui-react";
+import {
+  createComponentRegistry,
+  registerDefaultHTMLComponents,
+  registerDefaultShadcnComponents,
+  UIProvider,
+  ViewRenderer,
+} from "@osspkg/ui-react";
 import type { ViewSchema } from "@osspkg/ui-core";
 import "@osspkg/ui-react/styles.css";
 
@@ -25,15 +31,35 @@ const schema: ViewSchema = {
         component: "article",
         layout: { row: 1, cols: 8, offset: 2 },
         children: [
-          { id: "heading", component: "h1", layout: { row: 1, cols: 12 }, props: { text: "Edit profile" } },
+          {
+            id: "heading",
+            component: "h1",
+            layout: { row: 1, cols: 12 },
+            props: { text: "Edit profile" },
+          },
           {
             id: "profile-form",
             component: "form",
             events: { submit: { action: "save" } },
             children: [
-              { id: "name-label", component: "label", layout: { row: 1, cols: 12 }, props: { htmlFor: "profile-name", text: "Name" } },
-              { id: "name", component: "input", layout: { row: 2, cols: 8, offset: 2 }, props: { id: "profile-name", name: "name", placeholder: "Ada Lovelace" } },
-              { id: "save", component: "button", layout: { row: 3, cols: 8, offset: 2 }, props: { type: "submit", text: "Save profile" } },
+              {
+                id: "name-label",
+                component: "label",
+                layout: { row: 1, cols: 12 },
+                props: { htmlFor: "profile-name", text: "Name" },
+              },
+              {
+                id: "name",
+                component: "input",
+                layout: { row: 2, cols: 8, offset: 2 },
+                props: { id: "profile-name", name: "name", placeholder: "Ada Lovelace" },
+              },
+              {
+                id: "save",
+                component: "button",
+                layout: { row: 3, cols: 8, offset: 2 },
+                props: { type: "submit", text: "Save profile" },
+              },
             ],
           },
           {
@@ -50,5 +76,9 @@ const schema: ViewSchema = {
 };
 
 export function HTMLFormExample(): ReactElement {
-  return <UIProvider components={components}><ViewRenderer schema={schema} /></UIProvider>;
+  return (
+    <UIProvider components={components}>
+      <ViewRenderer schema={schema} />
+    </UIProvider>
+  );
 }

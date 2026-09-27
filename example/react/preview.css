@@ -16,7 +16,14 @@
 }
 
 :root {
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
   color: #171717;
   background: #f5f6f8;
   font-synthesis: none;
@@ -38,7 +45,9 @@ textarea {
   font: inherit;
 }
 
-#root { min-height: 100vh; }
+#root {
+  min-height: 100vh;
+}
 
 button {
   cursor: pointer;
@@ -68,8 +77,17 @@ textarea:focus-visible {
   }
 }
 
-[data-ui-node] h1 { margin: 0 0 1rem; font-size: 1.5rem; line-height: 1.3; font-weight: 650; letter-spacing: -.025em; }
+[data-ui-node] h1 {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+  line-height: 1.3;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
 
 @media (max-width: 640px) {
-  [data-ui-node] { grid-column: 1 / -1; grid-row: auto !important; }
+  [data-ui-node] {
+    grid-column: 1 / -1;
+    grid-row: auto !important;
+  }
 }

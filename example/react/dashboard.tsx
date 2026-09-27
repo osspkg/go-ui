@@ -1,5 +1,11 @@
 import type { ReactElement } from "react";
-import { createComponentRegistry, registerDefaultHTMLComponents, registerDefaultShadcnComponents, UIProvider, ViewRenderer } from "@osspkg/ui-react";
+import {
+  createComponentRegistry,
+  registerDefaultHTMLComponents,
+  registerDefaultShadcnComponents,
+  UIProvider,
+  ViewRenderer,
+} from "@osspkg/ui-react";
 import type { ViewSchema } from "@osspkg/ui-core";
 import "@osspkg/ui-react/styles.css";
 
@@ -12,24 +18,49 @@ const schema: ViewSchema = {
   id: "metrics.dashboard",
   regions: {
     "top-header": [
-      { id: "title", component: "h1", layout: { row: 1, cols: 12 }, props: { text: "Metrics dashboard" } },
+      {
+        id: "title",
+        component: "h1",
+        layout: { row: 1, cols: 12 },
+        props: { text: "Metrics dashboard" },
+      },
     ],
     "left-panel": [],
     "right-panel": [],
     bottom: [],
     content: [
-      { id: "requests", component: "card", layout: { row: 1, cols: 6 }, props: { text: "Requests: 12,480" } },
-      { id: "latency", component: "card", layout: { row: 1, cols: 6, offset: 6 }, props: { text: "p95 latency: 184 ms" } },
+      {
+        id: "requests",
+        component: "card",
+        layout: { row: 1, cols: 6 },
+        props: { text: "Requests: 12,480" },
+      },
+      {
+        id: "latency",
+        component: "card",
+        layout: { row: 1, cols: 6, offset: 6 },
+        props: { text: "p95 latency: 184 ms" },
+      },
       {
         id: "events",
         component: "data-table",
         layout: { row: 2, cols: 12 },
-        props: { "aria-label": "Recent events", rows: [{ event: "user.created", status: "success" }, { event: "user.deleted", status: "success" }] },
+        props: {
+          "aria-label": "Recent events",
+          rows: [
+            { event: "user.created", status: "success" },
+            { event: "user.deleted", status: "success" },
+          ],
+        },
       },
     ],
   },
 };
 
 export function DashboardExample(): ReactElement {
-  return <UIProvider components={components}><ViewRenderer schema={schema} /></UIProvider>;
+  return (
+    <UIProvider components={components}>
+      <ViewRenderer schema={schema} />
+    </UIProvider>
+  );
 }

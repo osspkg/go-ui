@@ -39,7 +39,9 @@ export function validatePath(path: string): string[] {
 function cloneValue<T>(value: T): T {
   if (Array.isArray(value)) return value.map(cloneValue) as T;
   if (value && typeof value === "object") {
-    return Object.fromEntries(Object.entries(value).map(([key, nested]) => [key, cloneValue(nested)])) as T;
+    return Object.fromEntries(
+      Object.entries(value).map(([key, nested]) => [key, cloneValue(nested)]),
+    ) as T;
   }
   return value;
 }

@@ -1,10 +1,10 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import type { ViewSchema } from "@osspkg/ui-core";
+import type { RPCTransport } from "@osspkg/ui-transport";
 import { createComponentRegistry } from "./registry.js";
 import { ViewRenderer } from "./renderer.js";
 import { UIProvider, useUISource, type UISource } from "./runtime.js";
-import type { RPCTransport } from "@osspkg/ui-transport";
 
 describe("view runtime bindings", () => {
   it("resolves state and context values before rendering and binds events", () => {
@@ -13,7 +13,11 @@ describe("view runtime bindings", () => {
     registry.register("probe", {
       component: (props: Record<string, unknown>) => {
         received = props;
-        return <output>{String(props.name)}:{String(props.workspace)}</output>;
+        return (
+          <output>
+            {String(props.name)}:{String(props.workspace)}
+          </output>
+        );
       },
       allowedProps: ["name", "workspace"],
       events: ["click"],
@@ -26,12 +30,14 @@ describe("view runtime bindings", () => {
       regions: {
         "top-header": [],
         "left-panel": [],
-        content: [{
-          id: "probe",
-          component: "probe",
-          props: { name: { $state: "name" }, workspace: { $context: "workspace.id" } },
-          events: { click: { action: "submit" } },
-        }],
+        content: [
+          {
+            id: "probe",
+            component: "probe",
+            props: { name: { $state: "name" }, workspace: { $context: "workspace.id" } },
+            events: { click: { action: "submit" } },
+          },
+        ],
         "right-panel": [],
         bottom: [],
       },
@@ -77,12 +83,11 @@ describe("view runtime bindings", () => {
   it("exposes idle source state and manual refresh", () => {
     let source: UISource | undefined;
     const registry = createComponentRegistry();
-    registry.register("source-probe", {
-      component: () => {
-        source = useUISource("users");
-        return <output>{source.status}</output>;
-      },
-    });
+    function SourceProbe() {
+      source = useUISource("users");
+      return <output>{source.status}</output>;
+    }
+    registry.register("source-probe", { component: SourceProbe });
     const schema: ViewSchema = {
       protocolVersion: "1.0",
       id: "source",
@@ -136,7 +141,11 @@ describe("view runtime bindings", () => {
           type: "tool",
           tool: "users.save",
           input: { name: { $event: "value" } },
-          effects: [{ type: "toast", variant: "success", message: "Saved" }, { type: "refresh-view", revision: "rev-2" }, { type: "patch-view", baseRevision: "rev-1", revision: "rev-2" }],
+          effects: [
+            { type: "toast", variant: "success", message: "Saved" },
+            { type: "refresh-view", revision: "rev-2" },
+            { type: "patch-view", baseRevision: "rev-1", revision: "rev-2" },
+          ],
         },
       },
       sources: { users: { type: "tool", tool: "users.list", refreshOn: ["save"] } },
@@ -150,15 +159,41 @@ describe("view runtime bindings", () => {
     };
 
     renderToStaticMarkup(
-      <UIProvider components={registry} transport={transport} effects={{ toast: (message) => { toasts.push(message); }, refreshView: (effect) => { refreshedViews.push(effect.type); }, patchView: (effect) => { patchedViews.push(effect.type); } }}>
+      <UIProvider
+        components={registry}
+        transport={transport}
+        effects={{
+          toast: (message) => {
+            toasts.push(message);
+          },
+          refreshView: (effect) => {
+            refreshedViews.push(effect.type);
+          },
+          patchView: (effect) => {
+            patchedViews.push(effect.type);
+          },
+        }}
+      >
         <ViewRenderer schema={schema} plugin="users" />
       </UIProvider>,
     );
     await (received?.onClick as (event: unknown) => Promise<void>)({ value: "Ada" });
 
     expect(calls).toEqual([
-      { method: "ui.action", params: { plugin: "users", view: "actions", action: "save", input: { name: "Ada" } } },
-      { method: "data.call", params: { plugin: "users", view: "actions", source: "users", operation: "users.list", input: {} } },
+      {
+        method: "ui.action",
+        params: { plugin: "users", view: "actions", action: "save", input: { name: "Ada" } },
+      },
+      {
+        method: "data.call",
+        params: {
+          plugin: "users",
+          view: "actions",
+          source: "users",
+          operation: "users.list",
+          input: {},
+        },
+      },
     ]);
     expect(toasts).toEqual(["Saved"]);
     expect(refreshedViews).toEqual(["refresh-view"]);

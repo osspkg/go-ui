@@ -4,17 +4,39 @@ import type { ReactNode } from "react";
 import type { ViewSchema } from "@osspkg/ui-core";
 import { createComponentRegistry } from "./registry.js";
 import { UIProvider } from "./runtime.js";
-import { ViewRenderer } from "./renderer.js";
+import { PluginView, ViewRenderer } from "./renderer.js";
 
 function emptyRegions() {
   return { "top-header": [], "left-panel": [], content: [], "right-panel": [], bottom: [] };
 }
 
 describe("static renderer", () => {
+  it("renders a schema passed directly to PluginView", () => {
+    const registry = createComponentRegistry();
+    const schema: ViewSchema = {
+      protocolVersion: "1.0",
+      id: "provided",
+      regions: emptyRegions(),
+    };
+
+    const markup = renderToStaticMarkup(
+      <UIProvider components={registry}>
+        <PluginView view="provided" schema={schema} />
+      </UIProvider>,
+    );
+
+    expect(markup).toContain('data-ui-region="content"');
+  });
+
   it("renders registered components, children, and grid metadata", () => {
     const registry = createComponentRegistry();
     registry.register("card", {
-      component: (props: Record<string, unknown>) => <article>{String(props.title)}{props.children as ReactNode}</article>,
+      component: (props: Record<string, unknown>) => (
+        <article>
+          {String(props.title)}
+          {props.children as ReactNode}
+        </article>
+      ),
       allowedProps: ["title"],
     });
     registry.register("text", {
@@ -27,17 +49,23 @@ describe("static renderer", () => {
       id: "renderer",
       regions: {
         ...emptyRegions(),
-        content: [{
-          id: "card",
-          component: "card",
-          layout: { row: 1, cols: 8, offset: 2 },
-          props: { title: "Users" },
-          children: [{ id: "text", component: "text", props: { value: "Ada" } }],
-        }],
+        content: [
+          {
+            id: "card",
+            component: "card",
+            layout: { row: 1, cols: 8, offset: 2 },
+            props: { title: "Users" },
+            children: [{ id: "text", component: "text", props: { value: "Ada" } }],
+          },
+        ],
       },
     };
 
-    const markup = renderToStaticMarkup(<UIProvider components={registry}><ViewRenderer schema={schema} /></UIProvider>);
+    const markup = renderToStaticMarkup(
+      <UIProvider components={registry}>
+        <ViewRenderer schema={schema} />
+      </UIProvider>,
+    );
 
     expect(markup).toContain("Users");
     expect(markup).toContain("Ada");
@@ -51,20 +79,46 @@ describe("static renderer", () => {
   it("renders declared slots and rejects undeclared slots", () => {
     const registry = createComponentRegistry();
     registry.register("card", {
-      component: (props: Record<string, unknown>) => <article>{(props.slots as Record<string, ReactNode[]>).footer}</article>,
+      component: (props: Record<string, unknown>) => (
+        <article>{(props.slots as Record<string, ReactNode[]>).footer}</article>
+      ),
       slots: ["footer"],
     });
-    registry.register("text", { component: (props: Record<string, unknown>) => <span>{String(props.value)}</span>, allowedProps: ["value"] });
+    registry.register("text", {
+      component: (props: Record<string, unknown>) => <span>{String(props.value)}</span>,
+      allowedProps: ["value"],
+    });
     const schema: ViewSchema = {
       protocolVersion: "1.0",
       id: "slots",
-      regions: { ...emptyRegions(), content: [{ id: "card", component: "card", slots: { footer: [{ id: "footer", component: "text", props: { value: "Footer" } }] } }] },
+      regions: {
+        ...emptyRegions(),
+        content: [
+          {
+            id: "card",
+            component: "card",
+            slots: { footer: [{ id: "footer", component: "text", props: { value: "Footer" } }] },
+          },
+        ],
+      },
     };
 
-    expect(renderToStaticMarkup(<UIProvider components={registry}><ViewRenderer schema={schema} /></UIProvider>)).toContain("Footer");
+    expect(
+      renderToStaticMarkup(
+        <UIProvider components={registry}>
+          <ViewRenderer schema={schema} />
+        </UIProvider>,
+      ),
+    ).toContain("Footer");
 
     schema.regions.content[0]!.slots = { other: [] };
-    expect(() => renderToStaticMarkup(<UIProvider components={registry}><ViewRenderer schema={schema} /></UIProvider>)).toThrow("slot other is not allowed");
+    expect(() =>
+      renderToStaticMarkup(
+        <UIProvider components={registry}>
+          <ViewRenderer schema={schema} />
+        </UIProvider>,
+      ),
+    ).toThrow("slot other is not allowed");
   });
 
   it("renders a safe fallback for unsupported components", () => {
@@ -74,7 +128,11 @@ describe("static renderer", () => {
       regions: { ...emptyRegions(), content: [{ id: "missing", component: "missing-component" }] },
     };
 
-    const markup = renderToStaticMarkup(<UIProvider components={createComponentRegistry()}><ViewRenderer schema={schema} /></UIProvider>);
+    const markup = renderToStaticMarkup(
+      <UIProvider components={createComponentRegistry()}>
+        <ViewRenderer schema={schema} />
+      </UIProvider>,
+    );
 
     expect(markup).toContain("Unsupported component: missing-component");
     expect(markup).toContain('data-unsupported-component="missing-component"');
@@ -86,10 +144,19 @@ describe("static renderer", () => {
     const schema: ViewSchema = {
       protocolVersion: "1.0",
       id: "props",
-      regions: { ...emptyRegions(), content: [{ id: "text", component: "text", props: { value: "unsafe" } }] },
+      regions: {
+        ...emptyRegions(),
+        content: [{ id: "text", component: "text", props: { value: "unsafe" } }],
+      },
     };
 
-    expect(() => renderToStaticMarkup(<UIProvider components={registry}><ViewRenderer schema={schema} /></UIProvider>)).toThrow("component props are not declared");
+    expect(() =>
+      renderToStaticMarkup(
+        <UIProvider components={registry}>
+          <ViewRenderer schema={schema} />
+        </UIProvider>,
+      ),
+    ).toThrow("component props are not declared");
   });
 
   it("rejects events without a host allowlist", () => {
@@ -99,10 +166,19 @@ describe("static renderer", () => {
       protocolVersion: "1.0",
       id: "events",
       actions: { save: { type: "set-state", path: "saved", value: true } },
-      regions: { ...emptyRegions(), content: [{ id: "button", component: "button", events: { click: { action: "save" } } }] },
+      regions: {
+        ...emptyRegions(),
+        content: [{ id: "button", component: "button", events: { click: { action: "save" } } }],
+      },
     };
 
-    expect(() => renderToStaticMarkup(<UIProvider components={registry}><ViewRenderer schema={schema} /></UIProvider>)).toThrow("component events are not declared");
+    expect(() =>
+      renderToStaticMarkup(
+        <UIProvider components={registry}>
+          <ViewRenderer schema={schema} />
+        </UIProvider>,
+      ),
+    ).toThrow("component events are not declared");
   });
 
   it("rejects plugin styling and raw React props", () => {
@@ -111,9 +187,18 @@ describe("static renderer", () => {
     const schema: ViewSchema = {
       protocolVersion: "1.0",
       id: "unsafe-props",
-      regions: { ...emptyRegions(), content: [{ id: "card", component: "card", props: { style: { color: "red" } } }] },
+      regions: {
+        ...emptyRegions(),
+        content: [{ id: "card", component: "card", props: { style: { color: "red" } } }],
+      },
     };
 
-    expect(() => renderToStaticMarkup(<UIProvider components={registry}><ViewRenderer schema={schema} /></UIProvider>)).toThrow("prop style is forbidden");
+    expect(() =>
+      renderToStaticMarkup(
+        <UIProvider components={registry}>
+          <ViewRenderer schema={schema} />
+        </UIProvider>,
+      ),
+    ).toThrow("prop style is forbidden");
   });
 });

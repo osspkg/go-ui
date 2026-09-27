@@ -11,6 +11,18 @@ install:
 lint:
 	goppy lint
 
+.PHONY: npm-lint
+npm-lint:
+	pnpm lint
+
+.PHONY: npm-format
+npm-format:
+	pnpm format
+
+.PHONY: npm-format-check
+npm-format-check:
+	pnpm format:check
+
 .PHONY: license
 license:
 	goppy license

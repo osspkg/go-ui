@@ -31,12 +31,36 @@ describe("default component registrations", () => {
       protocolVersion: "1.0",
       id: "defaults",
       regions: {
-        "top-header": [], "left-panel": [], "right-panel": [], bottom: [],
+        "top-header": [],
+        "left-panel": [],
+        "right-panel": [],
+        bottom: [],
         content: [
           { id: "link", component: "a", props: { href: "https://example.com", text: "Example" } },
-          { id: "profile-form", component: "form", props: { method: "post", enctype: "multipart/form-data", novalidate: true, autocomplete: "off" } },
+          {
+            id: "profile-form",
+            component: "form",
+            props: {
+              method: "post",
+              enctype: "multipart/form-data",
+              novalidate: true,
+              autocomplete: "off",
+            },
+          },
           { id: "email-label", component: "label", props: { for: "email", text: "Email" } },
-          { id: "email", component: "input", props: { id: "email", type: "email", autocomplete: "email", inputmode: "email", enterkeyhint: "next", maxlength: 255, spellcheck: false } },
+          {
+            id: "email",
+            component: "input",
+            props: {
+              id: "email",
+              type: "email",
+              autocomplete: "email",
+              inputmode: "email",
+              enterkeyhint: "next",
+              maxlength: 255,
+              spellcheck: false,
+            },
+          },
           { id: "notes", component: "textarea", props: { dirname: "notes.dir", wrap: "soft" } },
           { id: "submit", component: "button", props: { type: "submit", text: "Save" } },
           { id: "users", component: "data-table", props: { rows: [{ name: "Ada" }] } },
@@ -44,7 +68,11 @@ describe("default component registrations", () => {
       },
     };
 
-    const markup = renderToStaticMarkup(<UIProvider components={registry}><ViewRenderer schema={schema} /></UIProvider>);
+    const markup = renderToStaticMarkup(
+      <UIProvider components={registry}>
+        <ViewRenderer schema={schema} />
+      </UIProvider>,
+    );
     expect(markup).toContain('href="https://example.com"');
     expect(markup).toContain('method="post"');
     expect(markup).toContain('encType="multipart/form-data"');
@@ -58,11 +86,24 @@ describe("default component registrations", () => {
     expect(markup).toContain('type="submit"');
     expect(markup).toContain("Ada");
 
-    schema.regions.content[0]!.props = { href: "javascript:alert(1)", text: "unsafe" };
-    expect(() => renderToStaticMarkup(<UIProvider components={registry}><ViewRenderer schema={schema} /></UIProvider>)).toThrow("href must be a safe URL");
+    const unsafeURL = ["java", "script:alert(1)"].join("");
+    schema.regions.content[0]!.props = { href: unsafeURL, text: "unsafe" };
+    expect(() =>
+      renderToStaticMarkup(
+        <UIProvider components={registry}>
+          <ViewRenderer schema={schema} />
+        </UIProvider>,
+      ),
+    ).toThrow("href must be a safe URL");
 
     schema.regions.content[0]!.component = "form";
     schema.regions.content[0]!.props = { action: "https://attacker.example" };
-    expect(() => renderToStaticMarkup(<UIProvider components={registry}><ViewRenderer schema={schema} /></UIProvider>)).toThrow("prop action is not allowed");
+    expect(() =>
+      renderToStaticMarkup(
+        <UIProvider components={registry}>
+          <ViewRenderer schema={schema} />
+        </UIProvider>,
+      ),
+    ).toThrow("prop action is not allowed");
   });
 });

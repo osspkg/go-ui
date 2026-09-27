@@ -13,12 +13,17 @@ export class ComponentRegistry {
   private readonly definitions = new Map<string, ComponentDefinition>();
 
   register(name: string, definition: ComponentDefinition): void {
-    if (!name || this.definitions.has(name)) throw new Error(`component ${name} is already registered`);
+    if (!name || this.definitions.has(name))
+      throw new Error(`component ${name} is already registered`);
     this.definitions.set(name, definition);
   }
 
-  get(name: string): ComponentDefinition | undefined { return this.definitions.get(name); }
-  has(name: string): boolean { return this.definitions.has(name); }
+  get(name: string): ComponentDefinition | undefined {
+    return this.definitions.get(name);
+  }
+  has(name: string): boolean {
+    return this.definitions.has(name);
+  }
 }
 
 export function createComponentRegistry(): ComponentRegistry {

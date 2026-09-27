@@ -48,13 +48,22 @@ let nextCorrelationID = 1;
 
 export function createRequest(method: string, params: unknown): RPCRequest {
   const id = nextRequestID++;
-  return { jsonrpc: "2.0", id, method, params, meta: { correlationId: `ui-${nextCorrelationID++}` } };
+  return {
+    jsonrpc: "2.0",
+    id,
+    method,
+    params,
+    meta: { correlationId: `ui-${nextCorrelationID++}` },
+  };
 }
 
 export function readResponse<T>(value: unknown, expectedID: number): T {
-  if (!value || typeof value !== "object") throw new RPCError("INVALID_RESPONSE", "rpc response is invalid");
+  if (!value || typeof value !== "object")
+    throw new RPCError("INVALID_RESPONSE", "rpc response is invalid");
   const response = value as RPCResponse<T>;
-  if (response.jsonrpc !== "2.0" || response.id !== expectedID) throw new RPCError("INVALID_RESPONSE", "rpc response id is invalid");
-  if (response.error) throw new RPCError(response.error.code, response.error.message, response.error.data);
+  if (response.jsonrpc !== "2.0" || response.id !== expectedID)
+    throw new RPCError("INVALID_RESPONSE", "rpc response id is invalid");
+  if (response.error)
+    throw new RPCError(response.error.code, response.error.message, response.error.data);
   return response.result as T;
 }
