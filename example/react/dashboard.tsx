@@ -23,7 +23,7 @@ const schema: ViewSchema = {
         id: "events",
         component: "data-table",
         layout: { row: 2, cols: 12 },
-        props: { rows: [{ event: "user.created", status: "success" }, { event: "user.deleted", status: "success" }] },
+        props: { "aria-label": "Recent events", rows: [{ event: "user.created", status: "success" }, { event: "user.deleted", status: "success" }] },
       },
     ],
   },

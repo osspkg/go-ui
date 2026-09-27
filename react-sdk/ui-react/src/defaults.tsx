@@ -92,8 +92,8 @@ function DOMElement({ tag, props, className, children }: { tag: string; props: P
 
 function htmlClass(tag: string): string {
   if (tag === "a") return "text-ui-primary underline-offset-4 hover:underline";
-  if (tag === "button") return "inline-flex items-center justify-center rounded-md bg-ui-primary px-3 py-2 text-sm font-medium text-ui-primary-foreground hover:bg-ui-primary/90 disabled:pointer-events-none disabled:opacity-50";
-  if (["input", "textarea", "select"].includes(tag)) return "flex w-full rounded-md border border-ui-border bg-ui-background px-3 py-2 text-sm text-ui-foreground shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ui-ring disabled:cursor-not-allowed disabled:opacity-50";
+  if (tag === "button") return "inline-flex min-h-11 items-center justify-center rounded-md bg-ui-primary px-3 py-2 text-sm font-medium text-ui-primary-foreground hover:bg-ui-primary/90 disabled:pointer-events-none disabled:opacity-50";
+  if (["input", "textarea", "select"].includes(tag)) return "flex min-h-11 w-full rounded-md border border-ui-border bg-ui-background px-3 py-2 text-sm text-ui-foreground shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ui-ring disabled:cursor-not-allowed disabled:opacity-50";
   if (tag === "table") return "w-full caption-bottom text-sm";
   if (["th", "td"].includes(tag)) return "border-b border-ui-border px-4 py-3 text-left align-middle";
   if (["h1", "h2", "h3", "h4", "h5", "h6"].includes(tag)) return "font-semibold tracking-tight text-ui-foreground";
@@ -117,8 +117,8 @@ const shadcnElement: Record<string, string> = {
 };
 
 function shadcnClass(name: string): string {
-  if (name === "button") return "inline-flex items-center justify-center rounded-md bg-ui-primary px-3 py-2 text-sm font-medium text-ui-primary-foreground hover:bg-ui-primary/90 disabled:pointer-events-none disabled:opacity-50";
-  if (["input", "textarea", "select", "native-select"].includes(name)) return "flex w-full rounded-md border border-ui-border bg-ui-background px-3 py-2 text-sm text-ui-foreground shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ui-ring disabled:cursor-not-allowed disabled:opacity-50";
+  if (name === "button") return "inline-flex min-h-11 items-center justify-center rounded-md bg-ui-primary px-3 py-2 text-sm font-medium text-ui-primary-foreground hover:bg-ui-primary/90 disabled:pointer-events-none disabled:opacity-50";
+  if (["input", "textarea", "select", "native-select"].includes(name)) return "flex min-h-11 w-full rounded-md border border-ui-border bg-ui-background px-3 py-2 text-sm text-ui-foreground shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ui-ring disabled:cursor-not-allowed disabled:opacity-50";
   if (name === "card") return "rounded-xl border border-ui-border bg-ui-card p-6 text-ui-card-foreground shadow-sm";
   if (["badge", "marker"].includes(name)) return "inline-flex items-center rounded-md bg-ui-muted px-2 py-1 text-xs font-medium text-ui-muted-foreground";
   if (["alert", "empty", "message", "toast"].includes(name)) return "rounded-lg border border-ui-border bg-ui-card p-4 text-ui-card-foreground";
@@ -129,11 +129,23 @@ function shadcnClass(name: string): string {
   return "rounded-md border border-ui-border bg-ui-card p-4 text-ui-card-foreground";
 }
 
-function DataTable({ rows, loading, error }: Props): ReactNode {
+function DataTable({ rows, loading, error, "aria-label": ariaLabel }: Props): ReactNode {
   if (loading) return <output role="status" className="text-sm text-ui-muted-foreground">Loading…</output>;
   if (error) return <output role="alert" className="text-sm text-ui-destructive">{String(error)}</output>;
   const items = Array.isArray(rows) ? rows : [];
-  return <table className="w-full caption-bottom text-sm"><tbody>{items.map((row, index) => <tr key={index} className="border-b border-ui-border">{Object.values(row as Record<string, unknown>).map((value, cell) => <td key={cell} className="px-4 py-3 align-middle">{String(value ?? "")}</td>)}</tr>)}</tbody></table>;
+  const firstRow = items[0];
+  const columns = firstRow && typeof firstRow === "object" && !Array.isArray(firstRow)
+    ? Object.keys(firstRow as Record<string, unknown>)
+    : [];
+  return (
+    <table aria-label={typeof ariaLabel === "string" ? ariaLabel : "Data table"} className="w-full caption-bottom text-sm">
+      {columns.length > 0 && <thead><tr className="border-b border-ui-border">{columns.map((column) => <th key={column} scope="col" className="px-4 py-3 text-left font-medium">{column}</th>)}</tr></thead>}
+      <tbody>{items.map((row, index) => {
+        const record = row && typeof row === "object" ? row as Record<string, unknown> : {};
+        return <tr key={index} className="border-b border-ui-border">{columns.map((column) => <td key={column} className="px-4 py-3 align-middle">{String(record[column] ?? "")}</td>)}</tr>;
+      })}</tbody>
+    </table>
+  );
 }
 
 export function createDefaultShadcnDefinition(name: string): ComponentDefinition {

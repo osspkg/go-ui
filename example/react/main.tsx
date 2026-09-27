@@ -29,7 +29,7 @@ function ExamplesApp() {
               key={exampleName}
               type="button"
               aria-pressed={name === exampleName}
-              className="rounded-md border border-ui-border bg-ui-card px-3 py-2 text-sm font-medium transition-colors hover:bg-ui-muted aria-pressed:border-ui-primary aria-pressed:bg-ui-primary aria-pressed:text-ui-primary-foreground"
+              className="min-h-11 min-w-11 rounded-md border border-ui-border bg-ui-card px-3 py-2 text-sm font-medium transition-colors hover:bg-ui-muted aria-pressed:border-ui-primary aria-pressed:bg-ui-primary aria-pressed:text-ui-primary-foreground"
               onClick={() => setName(exampleName)}
             >
               {exampleName}
