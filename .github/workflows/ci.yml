@@ -1,6 +1,9 @@
 
 name: CI
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [ master ]
@@ -14,10 +17,10 @@ jobs:
       matrix:
         go: [ '1.26' ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
 
       - name: Setup Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v7
         with:
           go-version: ${{ matrix.go }}
 
@@ -25,3 +28,37 @@ jobs:
         env:
           COVERALLS_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
         run: make ci
+
+  react:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 12.6.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint React workspace
+        run: make npm-lint
+
+      - name: Check formatting
+        run: make npm-format-check
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
