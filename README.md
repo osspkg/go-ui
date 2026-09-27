@@ -38,17 +38,16 @@ Run these commands from the repository root. `make install` installs the pnpm wo
 | Command | What it runs |
 | --- | --- |
 | `make install` | Frozen pnpm dependency install, `goppy@latest` installation, and `goppy setup-lib` |
-| `make npm-build` | Build core, transport, and React packages in dependency order |
 | `make lint` | pnpm lint, formatting, formatting check, and `goppy lint` |
 | `make tests` | pnpm tests and `goppy test` |
 | `make build` | Build the three npm packages, run pnpm typecheck, and run `goppy build --arch=amd64` |
 | `make license` | Run `goppy license` |
-| `make pre-commit` | Run install, license, lint, tests, and build |
+| `make pre-commit` | Run install, license, lint, build, and tests |
 | `make examples-dev` | Start the React example app with Vite |
 
 `make lint` runs `pnpm format`, which can rewrite files. The Go lint and setup workflows can also update generated files. Review `git status` after running them.
 
-`make tests` and `make build` build the npm packages first so package exports resolve in a clean checkout. `make npm-publish` builds those packages before publishing them publicly.
+`make tests` does not build the npm packages. In a clean checkout, run `make build` before `make tests` so package exports in `dist` exist. `make npm-publish` runs the full build before publishing the packages publicly.
 
 ## Go usage
 
