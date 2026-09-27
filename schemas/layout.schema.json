@@ -1,0 +1,255 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "UI Grid Layout",
+  "description": "Places a node in the protocol's 12-column grid. Region-specific rules for side panels are enforced by the SDK validators.",
+  "type": "object",
+  "properties": {
+    "row": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "cols": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 12
+    },
+    "offset": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 11
+    }
+  },
+  "required": [
+    "row"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "cols": {
+            "const": 1
+          }
+        },
+        "required": [
+          "cols"
+        ]
+      },
+      "then": {
+        "properties": {
+          "offset": {
+            "maximum": 11
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "cols": {
+            "const": 2
+          }
+        },
+        "required": [
+          "cols"
+        ]
+      },
+      "then": {
+        "properties": {
+          "offset": {
+            "maximum": 10
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "cols": {
+            "const": 3
+          }
+        },
+        "required": [
+          "cols"
+        ]
+      },
+      "then": {
+        "properties": {
+          "offset": {
+            "maximum": 9
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "cols": {
+            "const": 4
+          }
+        },
+        "required": [
+          "cols"
+        ]
+      },
+      "then": {
+        "properties": {
+          "offset": {
+            "maximum": 8
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "cols": {
+            "const": 5
+          }
+        },
+        "required": [
+          "cols"
+        ]
+      },
+      "then": {
+        "properties": {
+          "offset": {
+            "maximum": 7
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "cols": {
+            "const": 6
+          }
+        },
+        "required": [
+          "cols"
+        ]
+      },
+      "then": {
+        "properties": {
+          "offset": {
+            "maximum": 6
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "cols": {
+            "const": 7
+          }
+        },
+        "required": [
+          "cols"
+        ]
+      },
+      "then": {
+        "properties": {
+          "offset": {
+            "maximum": 5
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "cols": {
+            "const": 8
+          }
+        },
+        "required": [
+          "cols"
+        ]
+      },
+      "then": {
+        "properties": {
+          "offset": {
+            "maximum": 4
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "cols": {
+            "const": 9
+          }
+        },
+        "required": [
+          "cols"
+        ]
+      },
+      "then": {
+        "properties": {
+          "offset": {
+            "maximum": 3
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "cols": {
+            "const": 10
+          }
+        },
+        "required": [
+          "cols"
+        ]
+      },
+      "then": {
+        "properties": {
+          "offset": {
+            "maximum": 2
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "cols": {
+            "const": 11
+          }
+        },
+        "required": [
+          "cols"
+        ]
+      },
+      "then": {
+        "properties": {
+          "offset": {
+            "maximum": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "cols": {
+            "const": 12
+          }
+        },
+        "required": [
+          "cols"
+        ]
+      },
+      "then": {
+        "properties": {
+          "offset": {
+            "maximum": 0
+          }
+        }
+      }
+    }
+  ]
+}

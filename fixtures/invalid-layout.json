@@ -1,0 +1,13 @@
+{
+  "protocolVersion": "1.0",
+  "id": "invalid",
+  "regions": {
+    "top-header": [],
+    "left-panel": [],
+    "content": [
+      {"id": "broken", "component": "card", "layout": {"row": 1, "cols": 8, "offset": 5}}
+    ],
+    "right-panel": [],
+    "bottom": []
+  }
+}

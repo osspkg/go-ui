@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "UI Manifest",
+  "description": "Lists a plugin's UI views and their schema resource URIs. The SDK validators additionally require view IDs to be unique.",
+  "type": "object",
+  "properties": {
+    "protocolVersion": {
+      "const": "1.0"
+    },
+    "plugin": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "node.schema.json#/$defs/SafeName"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "version"
+      ]
+    },
+    "views": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ViewDescriptor"
+      }
+    },
+    "requiredComponents": {
+      "type": "array",
+      "items": {
+        "$ref": "node.schema.json#/$defs/ComponentName"
+      }
+    }
+  },
+  "required": [
+    "protocolVersion",
+    "plugin",
+    "views"
+  ],
+  "$defs": {
+    "ViewDescriptor": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "node.schema.json#/$defs/SafeName"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "route": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "schema"
+      ]
+    }
+  }
+}

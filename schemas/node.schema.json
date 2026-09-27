@@ -1,0 +1,304 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "UI Node",
+  "description": "A declarative component node. Node trees are recursive; IDs must be unique within their view (checked by the SDK validators).",
+  "$ref": "#/$defs/Node",
+  "$defs": {
+    "SafeName": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^\\r\\n]+$"
+    },
+    "ComponentName": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "SafePath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "pattern": "^(?!\\.)(?!.*\\.$)(?!.*(?:^|\\.)(?:__proto__|prototype|constructor)(?:\\.|$)).+$"
+    },
+    "JSONValue": {
+      "anyOf": [
+        {
+          "type": [
+            "string",
+            "number",
+            "integer",
+            "boolean",
+            "null"
+          ]
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UIValue"
+          }
+        },
+        {
+          "type": "object",
+          "not": {
+            "minProperties": 1,
+            "maxProperties": 1,
+            "propertyNames": {
+              "pattern": "^\\$"
+            }
+          },
+          "propertyNames": {
+            "not": {
+              "enum": [
+                "__proto__",
+                "prototype",
+                "constructor"
+              ]
+            }
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/UIValue"
+          }
+        }
+      ]
+    },
+    "Reference": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 1,
+      "properties": {
+        "$state": {
+          "$ref": "#/$defs/SafePath"
+        },
+        "$context": {
+          "$ref": "#/$defs/SafePath"
+        },
+        "$source": {
+          "$ref": "#/$defs/SafePath"
+        },
+        "$event": {
+          "$ref": "#/$defs/SafePath"
+        },
+        "$result": {
+          "$ref": "#/$defs/SafePath"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Expression": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 1,
+      "properties": {
+        "$eq": {
+          "$ref": "#/$defs/TwoValues"
+        },
+        "$ne": {
+          "$ref": "#/$defs/TwoValues"
+        },
+        "$gt": {
+          "$ref": "#/$defs/TwoValues"
+        },
+        "$gte": {
+          "$ref": "#/$defs/TwoValues"
+        },
+        "$lt": {
+          "$ref": "#/$defs/TwoValues"
+        },
+        "$lte": {
+          "$ref": "#/$defs/TwoValues"
+        },
+        "$and": {
+          "$ref": "#/$defs/OneOrMoreValues"
+        },
+        "$or": {
+          "$ref": "#/$defs/OneOrMoreValues"
+        },
+        "$not": {
+          "$ref": "#/$defs/OneValue"
+        },
+        "$in": {
+          "$ref": "#/$defs/TwoValues"
+        },
+        "$exists": {
+          "$ref": "#/$defs/OneValue"
+        },
+        "$concat": {
+          "$ref": "#/$defs/ZeroOrMoreValues"
+        },
+        "$coalesce": {
+          "$ref": "#/$defs/OneOrMoreValues"
+        },
+        "$if": {
+          "$ref": "#/$defs/ThreeValues"
+        }
+      },
+      "additionalProperties": false
+    },
+    "UIValue": {
+      "description": "JSON literal, protocol reference, or expression. Path safety, source existence, and aggregate limits are checked by the SDK validators.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/JSONValue"
+        },
+        {
+          "$ref": "#/$defs/Reference"
+        },
+        {
+          "$ref": "#/$defs/Expression"
+        }
+      ]
+    },
+    "OneValue": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/UIValue"
+        }
+      ],
+      "items": false,
+      "minItems": 1
+    },
+    "TwoValues": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/UIValue"
+        },
+        {
+          "$ref": "#/$defs/UIValue"
+        }
+      ],
+      "items": false,
+      "minItems": 2
+    },
+    "ThreeValues": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/UIValue"
+        },
+        {
+          "$ref": "#/$defs/UIValue"
+        },
+        {
+          "$ref": "#/$defs/UIValue"
+        }
+      ],
+      "items": false,
+      "minItems": 3
+    },
+    "OneOrMoreValues": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/UIValue"
+      }
+    },
+    "ZeroOrMoreValues": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/UIValue"
+      }
+    },
+    "EventHandler": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/SafeName"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ActionStep"
+          }
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "action"
+          ]
+        },
+        {
+          "required": [
+            "steps"
+          ],
+          "properties": {
+            "steps": {
+              "minItems": 1
+            }
+          }
+        }
+      ]
+    },
+    "ActionStep": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "action"
+        },
+        "action": {
+          "$ref": "#/$defs/SafeName"
+        },
+        "input": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/UIValue"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "action"
+      ]
+    },
+    "Node": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/SafeName"
+        },
+        "component": {
+          "$ref": "#/$defs/ComponentName"
+        },
+        "layout": {
+          "$ref": "layout.schema.json"
+        },
+        "props": {
+          "type": "object",
+          "maxProperties": 64,
+          "additionalProperties": {
+            "$ref": "#/$defs/UIValue"
+          }
+        },
+        "events": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/EventHandler"
+          }
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Node"
+          }
+        },
+        "slots": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Node"
+            }
+          }
+        },
+        "when": {
+          "$ref": "#/$defs/UIValue"
+        }
+      },
+      "required": [
+        "id",
+        "component"
+      ]
+    }
+  }
+}

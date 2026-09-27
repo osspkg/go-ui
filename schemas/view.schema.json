@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "UI View",
+  "description": "A protocol 1.0 declarative view. Referential integrity and region-specific layout rules are additionally enforced by the SDK validators.",
+  "type": "object",
+  "properties": {
+    "protocolVersion": { "const": "1.0" },
+    "id": { "$ref": "node.schema.json#/$defs/SafeName" },
+    "revision": { "type": "string" },
+    "title": { "type": "string" },
+    "state": { "type": "object" },
+    "sources": {
+      "type": "object",
+      "propertyNames": { "$ref": "node.schema.json#/$defs/SafeName" },
+      "additionalProperties": { "$ref": "#/$defs/DataSource" }
+    },
+    "actions": { "$ref": "actions.schema.json" },
+    "regions": {
+      "type": "object",
+      "properties": {
+        "top-header": { "$ref": "#/$defs/NodeList" },
+        "left-panel": { "$ref": "#/$defs/NodeList" },
+        "content": { "$ref": "#/$defs/NodeList" },
+        "right-panel": { "$ref": "#/$defs/NodeList" },
+        "bottom": { "$ref": "#/$defs/NodeList" }
+      },
+      "required": ["top-header", "left-panel", "content", "right-panel", "bottom"]
+    }
+  },
+  "required": ["protocolVersion", "id", "regions"],
+  "$defs": {
+    "NodeList": {
+      "type": "array",
+      "items": { "$ref": "node.schema.json" }
+    },
+    "DataSource": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "tool" },
+        "tool": { "$ref": "node.schema.json#/$defs/SafeName" },
+        "input": {
+          "type": "object",
+          "additionalProperties": { "$ref": "node.schema.json#/$defs/UIValue" }
+        },
+        "policy": { "enum": ["manual", "on-mount"] },
+        "cache": {
+          "type": "object",
+          "properties": { "ttl": { "type": "integer", "minimum": 0 } }
+        },
+        "refreshOn": {
+          "type": "array",
+          "items": { "$ref": "node.schema.json#/$defs/SafeName" }
+        }
+      },
+      "required": ["type", "tool"]
+    }
+  }
+}

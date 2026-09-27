@@ -1,0 +1,16 @@
+{
+  "PLUGIN_NOT_FOUND": "plugin was not found",
+  "PLUGIN_UNAVAILABLE": "plugin is unavailable",
+  "PLUGIN_PROTOCOL_ERROR": "plugin protocol error",
+  "VIEW_NOT_FOUND": "view was not found",
+  "INVALID_UI_SCHEMA": "ui schema is invalid",
+  "UNSUPPORTED_UI_VERSION": "ui protocol version is unsupported",
+  "COMPONENT_NOT_SUPPORTED": "component is not supported",
+  "ACTION_NOT_ALLOWED": "action is not allowed",
+  "SOURCE_FAILED": "source failed",
+  "ACTION_FAILED": "action failed",
+  "TIMEOUT": "operation timed out",
+  "CANCELLED": "operation was cancelled",
+  "FORBIDDEN": "operation is forbidden",
+  "UNAUTHORIZED": "operation is unauthorized"
+}

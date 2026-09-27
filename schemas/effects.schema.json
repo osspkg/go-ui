@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "UI Action Effects",
+  "description": "An ordered list of client-side effects emitted by an action.",
+  "type": "array",
+  "items": { "$ref": "#/$defs/Effect" },
+  "$defs": {
+    "SafePath": { "$ref": "node.schema.json#/$defs/SafePath" },
+    "UIValue": { "$ref": "node.schema.json#/$defs/UIValue" },
+    "Effect": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "enum": ["set-state", "merge-state", "invalidate", "refresh-source", "refresh-view", "patch-view", "navigate", "toast", "dialog", "close-dialog"]
+        },
+        "path": { "$ref": "node.schema.json#/$defs/SafePath" },
+        "source": { "$ref": "node.schema.json#/$defs/SafeName" },
+        "value": { "$ref": "node.schema.json#/$defs/UIValue" },
+        "baseRevision": { "type": "string" },
+        "revision": { "type": "string" },
+        "to": { "type": "string", "minLength": 1 },
+        "variant": { "type": "string" },
+        "message": { "type": "string", "minLength": 1 }
+      },
+      "required": ["type"],
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "enum": ["set-state", "merge-state"] } }, "required": ["type"] },
+          "then": { "required": ["path"] }
+        },
+        {
+          "if": { "properties": { "type": { "enum": ["invalidate", "refresh-source"] } }, "required": ["type"] },
+          "then": { "required": ["source"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "navigate" } }, "required": ["type"] },
+          "then": { "required": ["to"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "toast" } }, "required": ["type"] },
+          "then": { "required": ["message"] }
+        }
+      ]
+    }
+  }
+}
