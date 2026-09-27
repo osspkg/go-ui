@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { createComponentRegistry, registerDefaultHTMLComponents, registerDefaultShadcnComponents, UIProvider, ViewRenderer } from "@osspkg/ui-react";
 import type { ViewSchema } from "@osspkg/ui-core";
 import "@osspkg/ui-react/styles.css";
@@ -29,6 +30,6 @@ const schema: ViewSchema = {
   },
 };
 
-export function DashboardExample() {
+export function DashboardExample(): ReactElement {
   return <UIProvider components={components}><ViewRenderer schema={schema} /></UIProvider>;
 }

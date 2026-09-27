@@ -1,19 +1,22 @@
 import { createRoot } from "react-dom/client";
-import { useState, type ComponentType } from "react";
+import { useState, type ComponentType, type ReactElement } from "react";
 import { BasicExample } from "./basic.js";
 import { DashboardExample } from "./dashboard.js";
 import { HTMLFormExample } from "./html-form.js";
 import "./preview.css";
 
-const examples: Record<string, ComponentType> = {
+const examples = {
   Basic: BasicExample,
   "HTML form": HTMLFormExample,
   Dashboard: DashboardExample,
-};
+} satisfies Record<string, ComponentType>;
 
-function ExamplesApp() {
-  const [name, setName] = useState("Basic");
-  const Example = examples[name] ?? BasicExample;
+type ExampleName = keyof typeof examples;
+const exampleNames = Object.keys(examples) as ExampleName[];
+
+function ExamplesApp(): ReactElement {
+  const [name, setName] = useState<ExampleName>("Basic");
+  const Example = examples[name];
 
   return (
     <main className="min-h-screen bg-ui-muted px-4 py-8 text-ui-foreground sm:px-8 sm:py-12">
@@ -24,7 +27,7 @@ function ExamplesApp() {
           <p className="max-w-2xl text-ui-muted-foreground">Preview declarative schemas rendered with the default HTML and shadcn component registries.</p>
         </header>
         <nav aria-label="Examples" className="flex flex-wrap gap-2 rounded-xl border border-ui-border bg-ui-card p-2 shadow-sm">
-          {Object.keys(examples).map((exampleName) => (
+          {exampleNames.map((exampleName) => (
             <button
               key={exampleName}
               type="button"
@@ -44,4 +47,7 @@ function ExamplesApp() {
   );
 }
 
-createRoot(document.getElementById("root")!).render(<ExamplesApp />);
+const rootElement = document.getElementById("root");
+if (!rootElement) throw new Error("Missing React root element");
+
+createRoot(rootElement).render(<ExamplesApp />);

@@ -132,7 +132,7 @@ function shadcnClass(name: string): string {
 function DataTable({ rows, loading, error, "aria-label": ariaLabel }: Props): ReactNode {
   if (loading) return <output role="status" className="text-sm text-ui-muted-foreground">Loading…</output>;
   if (error) return <output role="alert" className="text-sm text-ui-destructive">{String(error)}</output>;
-  const items = Array.isArray(rows) ? rows : [];
+  const items: unknown[] = Array.isArray(rows) ? rows : [];
   const firstRow = items[0];
   const columns = firstRow && typeof firstRow === "object" && !Array.isArray(firstRow)
     ? Object.keys(firstRow as Record<string, unknown>)
